@@ -1,0 +1,3 @@
+waveDyMFoam.C
+
+EXE = $(WAVES_APPBIN)/waveDyMFoam

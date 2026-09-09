@@ -1,0 +1,5 @@
+../../of2Restraint.C
+of2_fast_stubs.C
+testRestrainHarness.C
+
+EXE = $(FOAM_USER_APPBIN)/testRestrainHarness

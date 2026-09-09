@@ -1,0 +1,10 @@
+EXE_INC = \
+    -I../.. \
+    -I$(LIB_SRC)/rigidBodyDynamics/lnInclude \
+    -I$(OPENFAST_SRC_DIR)/modules/openfast-library/src \
+    -I$(OPENFAST_SRC_DIR)/modules/externalinflow/src \
+    -I$(OPENFAST_SRC_DIR)/modules/extloads/src
+
+EXE_LIBS = \
+    -lrigidBodyDynamics \
+    -lOpenFOAM

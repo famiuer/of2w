@@ -1,0 +1,57 @@
+/*---------------------------------------------------------------------------*\
+    Example: the custom (fallback) OC4 MoorDyn coupling restraint wired into a
+    rigidBodyMotion (RBD) dynamicMeshDict.
+
+    This restraint (type "moorDynCoupling", library liboc4MoorDynRestraint.so)
+    wraps the repo's own tested coupling core. It is the vendor-independent
+    FALLBACK; the primary mooring path is FOAMmooring's moorDynR2. Use it with
+    `motionSolver rigidBodyMotion` (NOT sixDoFRigidBodyMotion) -- see
+    oc4_hifi_*/constant/dynamicMeshDict_rbd for the full case dict.
+\*---------------------------------------------------------------------------*/
+
+motionSolver        rigidBodyMotion;
+
+motionSolverLibs
+(
+    rigidBodyMeshMotion
+    "liboc4MoorDynRestraint.so"
+);
+
+rigidBodyMotionCoeffs
+{
+    // ... report / solver / accelerationRelaxation / bodies (platformBody) ...
+
+    restraints
+    {
+        mooring
+        {
+            type                        moorDynCoupling;
+            body                        platformBody;
+
+            // MoorDyn v2 input deck (relative to the case directory)
+            inputFile                   "constant/coupling/moordyn/lines.txt";
+
+            // Optional: explicit MoorDyn shared library (default libmoordyn.so)
+            libraryPath                 "libmoordyn.so";
+            logFilePath                 "postProcessing/coupling/moordyn/moordyn.log";
+
+            // Platform reference point in the BODY frame: vector from the body
+            // joint J (root origin) to the platform reference point.
+            fromJtoPtfmReferencePoint   (0 0 0.54);
+
+            // Global-datum shift OpenFOAM -> MoorDyn so MoorDyn sees SWL at z=0
+            // (OpenFOAM SWL is z=15 here).
+            openFoamToMoorDynOffset     (0 0 -15.0);
+
+            referencePointName          oc4ReferencePoint;
+            shiftResultToPlatformReferencePoint true;
+
+            debugCsvPath                "postProcessing/coupling/moordyn/moordyn_restraint.csv";
+            verbosity                   0;
+            skipInitialConditionSolve   false;
+        }
+    }
+}
+
+
+// ************************************************************************* //

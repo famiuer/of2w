@@ -1,0 +1,36 @@
+[wrapper]
+name = "oc4_openfast_smoke"
+backend = "stub"
+openfast_input = "openfast/Main.fst"
+out_root = "outputs/openfast_smoke"
+
+[coupling]
+reaction_load_mode = "tower_base_wrench"
+platform_reference_point = [0.0, 0.0, -14.46]
+tower_base_point = [0.0, 0.0, -5.0]
+openfoam_to_openfast_offset = [0.0, 0.0, -15.0]
+
+[motion]
+input_mode = "imposed_platform_6dof"
+displacement_order = ["x", "y", "z", "roll", "pitch", "yaw"]
+velocity_order = ["vx", "vy", "vz", "omega_x", "omega_y", "omega_z"]
+acceleration_order = ["ax", "ay", "az", "alpha_x", "alpha_y", "alpha_z"]
+angles_unit = "rad"
+position_unit = "m"
+
+[time]
+dt_openfast = 0.01
+substeps_per_coupling_step = 1
+
+[diagnostics]
+return_rotor_speed = true
+return_generator_power = true
+return_blade_pitch = true
+return_tower_top_displacement = true
+return_controller_status = true
+
+[openfast_requirements]
+hydrodyn_mode = "off_for_cfd_coupled_platform"
+moordyn_mode = "off"
+platform_motion_source = "external"
+notes = "Use OpenFAST for aero-servo-elastic turbine response, not platform hydrodynamics, in the production CFD-coupled path."

@@ -1,0 +1,19 @@
+[submodule "external/openfast"]
+	path = external/openfast
+	url = https://github.com/famiuer/openfast.git
+	branch = of2-coupling-v0.1
+[submodule "external/moordyn"]
+	path = external/moordyn
+	url = https://github.com/famiuer/MoorDyn.git
+[submodule "external/foamMooring"]
+	path = external/foamMooring
+	url = https://github.com/famiuer/foamMooring.git
+	branch = of2-restart
+[submodule "external/stabRAS"]
+	path = external/stabRAS
+	url = https://github.com/famiuer/stabRAS_v1712.git
+	branch = of2306-port
+[submodule "external/waves2Foam"]
+	path = external/waves2Foam
+	url = https://github.com/famiuer/waves2Foam.git
+	branch = of2-coupling-v0.1

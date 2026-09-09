@@ -1,0 +1,7 @@
+moorDynRestraint.C
+../src/MoorDynLoadProvider.cpp
+../src/MoorDynRestraintBridge.cpp
+../../moordyn/src/MoorDynCApiAdapter.cpp
+../../common/src/Formatting.cpp
+
+LIB = $(FOAM_USER_LIBBIN)/liboc4MoorDynRestraint

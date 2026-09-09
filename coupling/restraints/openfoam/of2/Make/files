@@ -1,0 +1,4 @@
+of2Restraint.C
+of2RigidBodyStateWriter.C
+
+LIB = $(FOAM_USER_LIBBIN)/libOF2

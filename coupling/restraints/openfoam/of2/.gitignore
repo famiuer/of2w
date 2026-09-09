@@ -1,0 +1,9 @@
+# OpenFOAM wmake build artifacts
+Make/linux64GccDPInt32Opt/
+Make/*Opt/
+lnInclude/
+
+# Local logs / cores
+*.log
+core
+core.*

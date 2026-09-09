@@ -1,0 +1,31 @@
+/* OpenFAST shared library + canonical C header location.
+
+   Required environment variables (no defaults — set them before running
+   `wmake libso` from this directory):
+
+       OPENFAST_BUILD_DIR  : where you built libopenfastlib.so
+                             (typically <repo>/build/openfast)
+       OPENFAST_SRC_DIR    : where the OpenFAST source tree lives
+                             (typically <repo>/external/openfast)
+
+   Example:
+       export OPENFAST_BUILD_DIR=$PWD/build/openfast
+       export OPENFAST_SRC_DIR=$PWD/external/openfast
+       (cd coupling/restraints/openfoam/of2 && wmake libso)
+*/
+
+EXE_INC = \
+    -I$(LIB_SRC)/dynamicMesh/lnInclude \
+    -I$(LIB_SRC)/meshTools/lnInclude \
+    -I$(LIB_SRC)/rigidBodyDynamics/lnInclude \
+    -I$(OPENFAST_SRC_DIR)/modules/openfast-library/src \
+    -I$(OPENFAST_SRC_DIR)/modules/externalinflow/src \
+    -I$(OPENFAST_SRC_DIR)/modules/extloads/src
+
+LIB_LIBS = \
+    -ldynamicMesh \
+    -lmeshTools \
+    -lrigidBodyDynamics \
+    -L$(OPENFAST_BUILD_DIR)/modules/openfast-library \
+    -lopenfastlib \
+    -Wl,-rpath,$(OPENFAST_BUILD_DIR)/modules/openfast-library
