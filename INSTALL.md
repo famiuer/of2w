@@ -72,7 +72,7 @@ driver, used to run baselines) and `build/openfast/modules/openfast-library/libo
 default; if you need it, add `-DBUILD_OPENFAST_CPP_API=ON`.
 
 > **Note**: the submodule pin (f54fe0192) is on famiuer/openfast, branch
-> `of2-coupling-v0.1`. It carries the OF² Fortran patches
+> `of2-coupling-v0.1`. It carries the OF2W Fortran patches
 > (`PMI_Bridge` module + `OF2_SetImposedPlatformState`,
 > `OF2_GetTowerBaseReaction`, `OF2_IsActive` C-ABI symbols) that
 > `libOF2.so` calls into. These patches are not in upstream

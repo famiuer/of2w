@@ -2,7 +2,7 @@
 
 ## OpenFAST C API
 
-OF² calls OpenFAST through the **`FAST_*` C ABI** (`FAST_Library.f90`'s
+OF2W calls OpenFAST through the **`FAST_*` C ABI** (`FAST_Library.f90`'s
 `FAST_Sizes` / `FAST_Start` / `FAST_Update` / `FAST_End`) combined with
 the **`OF2_*` Fortran bridge** that we add to OpenFAST in the
 `famiuer/openfast @ of2-coupling-v0.1` patch series (commits
@@ -15,10 +15,10 @@ APIs is in `coupling/openfast/`. Key entry points:
 |---|---|---|
 | `FAST_Sizes`                       | Read .fst, return DT, TMax, NumOuts, AbortErrLev. Trailing Fortran OPTIONAL args must be NULL-defaulted in C/C++ declarations (see §19.10). | `of2Restraint` constructor |
 | `FAST_Start`                       | Solve initial conditions at t=0, populate first row of OutputAry. NumInputs_c MUST be 51 (the FAST_OpFM input vector size) or `FAST_Update` silently fails later. | `of2Restraint` constructor |
-| **`OF2_SetImposedPlatformState`**  | (OF² patch) Push the body's `disp[6]` and `vel[6]` into ED's m%QT and m%QD2T arrays before stepping. | Once per CFD step, beginning of `of2Restraint::restrain()` |
+| **`OF2_SetImposedPlatformState`**  | (OF2W patch) Push the body's `disp[6]` and `vel[6]` into ED's m%QT and m%QD2T arrays before stepping. | Once per CFD step, beginning of `of2Restraint::restrain()` |
 | `FAST_Update`                      | Advance ED by one DT, evaluating tower dynamics with the imposed platform kinematics. | Once per CFD step, after `OF2_SetImposedPlatformState` |
-| **`OF2_GetTowerBaseReaction`**     | (OF² patch) Read the tower-base reaction wrench (`F[3]`, `M[3]`) that the tower exerts on the platform after the step. | Once per CFD step, after `FAST_Update` |
-| `OF2_IsActive`                     | (OF² patch) Sentinel: returns true if the OpenFAST binary has the OF² patches linked in. Used to fail fast if a colleague accidentally builds against stock NREL OpenFAST. | of2Restraint constructor (post-`FAST_Start`) |
+| **`OF2_GetTowerBaseReaction`**     | (OF2W patch) Read the tower-base reaction wrench (`F[3]`, `M[3]`) that the tower exerts on the platform after the step. | Once per CFD step, after `FAST_Update` |
+| `OF2_IsActive`                     | (OF2W patch) Sentinel: returns true if the OpenFAST binary has the OF2W patches linked in. Used to fail fast if a colleague accidentally builds against stock NREL OpenFAST. | of2Restraint constructor (post-`FAST_Start`) |
 | `FAST_End`                         | Clean shutdown, write `.sum` files. | of2Restraint destructor |
 
 ### Wrench convention
@@ -68,7 +68,7 @@ but is a build-time dependency. foamMooring talks to MoorDyn through
 the same C API that `coupling/moordyn/MoorDynCApiAdapter.cpp` wraps.
 Both use the same MoorDyn binary; they don't share state.
 
-If you need OF²-internal MoorDyn for non-OpenFOAM tests, use the
+If you need OF2W-internal MoorDyn for non-OpenFOAM tests, use the
 `coupling_moordyn` adapter directly (see `coupling/moordyn/tests/`).
 
 ### MoorDyn IC sequencing (gotcha — v2.6.x)

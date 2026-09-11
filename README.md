@@ -1,4 +1,4 @@
-# of2W
+# OF2W
 
 OpenFOAM and OpenFAST coupling for floating offshore wind turbines.
 OpenFOAM is the master: it resolves the two-phase hull hydrodynamics,

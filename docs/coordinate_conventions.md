@@ -1,6 +1,6 @@
 # Coordinate conventions
 
-Single most common source of bugs in OF² is mixing reference frames and
+Single most common source of bugs in OF2W is mixing reference frames and
 sign conventions across OpenFOAM, ElastoDyn, and MoorDyn. This document
 states the rules and points out where v3/v6 deviated from them.
 
@@ -70,7 +70,7 @@ contributions, there is a torque error proportional to the 1.3 m offset.
 
 ## Mooring fairleads
 
-Mooring/lines_oc4.txt body-frame fairlead z = +1. OF² applies the body's
+Mooring/lines_oc4.txt body-frame fairlead z = +1. OF2W applies the body's
 *current* world pose to MoorDyn → world fairlead z = `transform.r.z +
 1` = −11.722 in v3/v6.
 
@@ -110,7 +110,7 @@ R/P/Y (radians) into positions 3–5.
 they're singular at ±90° pitch and the decomposition order matters. Use
 rotation matrices or quaternions internally.
 
-## Quick checklist for any new OF² case
+## Quick checklist for any new OF2W case
 
 Before submitting, verify:
 
@@ -130,5 +130,5 @@ Before submitting, verify:
 8. [ ] `Mooring/lines_oc4.txt` fairlead z values consistent with the
        intended world z (= body-frame z + transform.r.z).
 9. [ ] ED `.fst` has `CompHydro=0`, `CompMooring=0`, `CompServo=0` for
-       coupled OF² decay (other modules: depends on test).
+       coupled OF2W decay (other modules: depends on test).
 10. [ ] ED `.dat` platform IC values are all 0 (driven by OF).

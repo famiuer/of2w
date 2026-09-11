@@ -65,7 +65,7 @@ cd ../..
 
 `librigidBodyMooring.so` will land in `$FOAM_USER_LIBBIN`.
 
-## 4. OF² core library + unit tests
+## 4. OF2W core library + unit tests
 
 ```bash
 cmake -S coupling -B build/coupling \
@@ -129,7 +129,7 @@ point `HydroDyn.dat`'s `PotFile` at them.
 | `Sub-cycling is not supported with the CrankNicolson ddt scheme` | `nAlphaSubCycles > 1` in fvSolution with `ddtSchemes { default CrankNicolson 0.9; }` | Keep `nAlphaSubCycles 1`, or switch ddt scheme to `Euler` |
 | Body's `transform` translation seems not to move the body | Convention: OpenFOAM rigid-body `transform` sets the kinematic state, but `snappyHexMesh` carves the cavity at the literal STL world coords. To physically move the body, edit the STL or use `transformPoints`, not `transform` | See `cases/oc4-decay-v6/README.md` and `docs/architecture.md` |
 | MoorDyn IC convergence FPE | `icStationary` is broken in MoorDyn v2.6.1 | Set `ICgenDynamic 1` in the moor input file; ensure Point IDs are sequential |
-| ED reports PtfmHeave = 0 at t=0 even though I set PtfmHeave=+1 in `.fst` | In OF² mode (CompHydro=0), the of2Restraint overrides ED's IC with the body's *relative-from-initial* world position. To get a +1 m IC: lift the body via STL/transform, or lower the water level via `setFieldsDict` (water z=−1 m gives a +1 m relative offset without re-meshing) | This is the v6 setup; see `cases/oc4-decay-v6/README.md` |
+| ED reports PtfmHeave = 0 at t=0 even though I set PtfmHeave=+1 in `.fst` | In OF2W mode (CompHydro=0), the of2Restraint overrides ED's IC with the body's *relative-from-initial* world position. To get a +1 m IC: lift the body via STL/transform, or lower the water level via `setFieldsDict` (water z=−1 m gives a +1 m relative offset without re-meshing) | This is the v6 setup; see `cases/oc4-decay-v6/README.md` |
 
 ## Diagnostic queries
 

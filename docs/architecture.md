@@ -1,4 +1,4 @@
-# OF² architecture
+# OF2W architecture
 
 ## Module split
 
@@ -13,7 +13,7 @@ coupling/
 │   └── include/   # public headers
 ├── restraints/    # adapters used by OpenFOAM-side restraints
 │   ├── src/       # OpenFASTLoadProvider, MoorDynLoadProvider,
-│   │              # MoorDynRestraintBridge — convert OF² kinematics to/from
+│   │              # MoorDynRestraintBridge — convert OF2W kinematics to/from
 │   │              # the wrench format the upstream libraries expect
 │   └── openfoam/  # the actual OpenFOAM plugin classes
 │       ├── moorDynRestraint.{C,H}    # body restraint, calls foamMooring
@@ -37,7 +37,7 @@ coupling/
    - Once per CFD step (gated by `lastStepTime_ + 0.5*dt`):
        a. `OF2_SetImposedPlatformState(disp, vel)` — push the 6-vector
           displacement and velocity into ElastoDyn's internal m%QT /
-          m%QD2T arrays (this is the OF² Fortran patch on the famiuer
+          m%QD2T arrays (this is the OF2W Fortran patch on the famiuer
           openfast fork).
        b. `FAST_Update(...)` — advance ElastoDyn by one DT, evaluating
           tower dynamics under the imposed platform kinematics.
@@ -47,7 +47,7 @@ coupling/
           within the same CFD step.
    - Adds the cached wrench to the body at `towerBasePoint` (body-frame)
      on every call within the CFD step.
-4. `moorDynR2::restrain()` (foamMooring's restraint, not OF²'s but used
+4. `moorDynR2::restrain()` (foamMooring's restraint, not OF2W's but used
    alongside): communicates the body's *absolute* world pose to MoorDyn,
    receives chain forces at the fairleads, adds them to the body.
 
