@@ -1,0 +1,85 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      environmentalProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+seaLevel	0.00;
+
+relaxationNames (inlet outlet);
+initializationName inlet;
+
+inletCoeffs
+{
+    waveType    combinedWaves;
+    combinedWaveNames (inletWave inletCurrent inletComp);
+    Tsoft       20;
+    debug       0;
+    relaxationZone
+    {
+        relaxationScheme Spatial;
+        relaxationShape  Rectangular;
+        beachType        Empty;
+        relaxType   INLET;
+        startX      (-400 -5 -80);
+        endX        (-250  5  35);
+        orientation      (1.0 0.0 0.0);
+    }
+};
+
+inletWaveCoeffs
+{
+    waveType    stokesSecond;
+    Tsoft       20;
+    depth       80;
+    period      10;          // ABSOLUTE period; patch_doppler.py -> T_int after
+    phi         0.000000;
+    direction  (1.0 0.0 0.0);
+    height      6;
+    debug       0;
+};
+
+inletCurrentCoeffs
+{
+    // 1/7th power-law through-current (custom theory, libwaves2Foam).
+    waveType    powerLawCurrent;
+    Uref        (0.5 0 0);
+    depth       80;
+    exponent    0.14285714;
+    Tsoft       0;
+};
+
+inletCompCoeffs
+{
+    // Stokes-transport compensation: Q = a^2 sigma/(2 tanh kh) = 2.757 m2/s
+    // on the Doppler-shifted wave -> U = -Q/h = -0.03446 m/s (uniform).
+    waveType    potentialCurrent;
+    U           (-0.03446 0 0);
+    Tsoft       20;
+};
+
+outletCoeffs
+{
+    // Same profile as the inlet current -> identical net column flux (35 m2/s).
+    waveType    powerLawCurrent;
+    Uref        (0.5 0 0);
+    depth       80;
+    exponent    0.14285714;
+    Tsoft       0;
+    relaxationZone
+    {
+        relaxationScheme Spatial;
+        relaxationShape  Rectangular;
+        beachType        Empty;
+        relaxType   OUTLET;
+        startX      (200 -5 -80);
+        endX        (561 5  35);
+        orientation      (1.0 0.0 0.0);
+    }
+};
+// ************************************************************************* //

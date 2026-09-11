@@ -1,0 +1,92 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2306                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version	2.0;
+    format	ascii;
+    class	dictionary;
+    object	waveProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+seaLevel            0;
+
+relaxationNames     ( inlet outlet );
+
+initializationName  inlet;
+
+inletCoeffs
+{
+    waveType            combinedWaves;
+    combinedWaveNames   ( inletWave inletCurrent inletComp );
+
+    relaxationZone
+    {
+        relaxationScheme    Spatial;
+        relaxationShape     Rectangular;
+        beachType           Empty;
+        relaxType           INLET;
+        startX              ( -400 -5 -80 );
+        endX                ( -250 5 35 );
+        orientation         ( 1 0 0 );
+    }
+}
+
+inletWaveCoeffs
+{
+    waveType            stokesSecond;
+    Tsoft               20;
+    depth               80;
+    period              10.303302;
+    direction           ( 1 0 0 );
+    phi                 0;
+    height              6;
+    waveNumber          (0.03808026 0.0 0.0);
+    omega               0.62831853;
+    debug               0;
+}
+
+inletCurrentCoeffs
+{
+    waveType            powerLawCurrent;
+    Uref                ( 0.5 0 0 );
+    depth               80;
+    exponent            0.14285714;
+    Tsoft               0;
+}
+
+inletCompCoeffs
+{
+    waveType            potentialCurrent;
+    U                   ( -0.03446 0 0 );
+    Tsoft               20;
+}
+
+outletCoeffs
+{
+    waveType            powerLawCurrent;
+    Uref                ( 0.5 0 0 );
+    depth               80;
+    exponent            0.14285714;
+    Tsoft               0;
+
+    relaxationZone
+    {
+        relaxationScheme    Spatial;
+        relaxationShape     Rectangular;
+        beachType           Empty;
+        relaxType           OUTLET;
+        startX              ( 200 -5 -80 );
+        endX                ( 561 5 35 );
+        orientation         ( 1 0 0 );
+    }
+}
+
+
+
+// ************************************************************************* //

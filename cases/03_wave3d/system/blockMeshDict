@@ -1,0 +1,50 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+\*---------------------------------------------------------------------------*/
+FoamFile { version 2.0; format ascii; class dictionary; object blockMeshDict; }
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// 3D regular-wave tank = lc3p1wave2d_v6 extruded in y. No platform: this case
+// only verifies the 3D wave generation/propagation/absorption at the width the
+// future OC4 platform case needs.
+//
+//   x [-400, 561]  : inlet relax zone [-400,-250] (~1L), clean, outlet
+//                    absorption [200,561] (~2.3L). L = 155.6 m (H=6, T=10, h=80).
+//   y [-80, 80]    : 160 m width — matches the OC4 overset background (v11) and
+//                    the original oc4 wave cases. Lateral BC = symmetry: exact
+//                    for the long-crested wave (d/dy = 0); revisit (widen and/or
+//                    add lateral absorption) once a scattering body is present.
+//   z [-80, 30]    : depth 80 m, SWL z=0, 30 m air.
+//
+// Resolution: x 801 (dx=1.20 m ~ L/130), z 367 (dz=0.30 m = H/20) — both
+
+convertToMeters 1;
+
+vertices
+(
+    (-400 -80 -80)   // 0
+    ( 561 -80 -80)   // 1
+    ( 561  80 -80)   // 2
+    (-400  80 -80)   // 3
+    (-400 -80  30)   // 4
+    ( 561 -80  30)   // 5
+    ( 561  80  30)   // 6
+    (-400  80  30)   // 7
+);
+
+blocks
+(
+    hex (0 1 2 3 4 5 6 7) (801 16 367) simpleGrading (1 1 1)
+);
+
+edges ( );
+
+boundary
+(
+    inlet      { type patch;    faces ( (0 4 7 3) ); }
+    outlet     { type patch;    faces ( (1 2 6 5) ); }
+    bottom     { type wall;     faces ( (0 3 2 1) ); }
+    atmosphere { type patch;    faces ( (4 5 6 7) ); }
+    sides      { type symmetry; faces ( (0 1 5 4) (3 7 6 2) ); }
+);
+
+mergePatchPairs ( );
+// ************************************************************************* //

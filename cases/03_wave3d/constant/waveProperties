@@ -1,0 +1,81 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2306                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version	2.0;
+    format	ascii;
+    class	dictionary;
+    object	waveProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+seaLevel            0;
+
+relaxationNames     ( inlet outlet );
+
+initializationName  inlet;
+
+inletCoeffs
+{
+    waveType            combinedWaves;
+    combinedWaveNames   ( inletWave inletCurrent );
+
+    relaxationZone
+    {
+        relaxationScheme    Spatial;
+        relaxationShape     Rectangular;
+        beachType           Empty;
+        relaxType           INLET;
+        startX              ( -400 -100 -80 );
+        endX                ( -250 100 35 );
+        orientation         ( 1 0 0 );
+    }
+}
+
+inletWaveCoeffs
+{
+    waveType            stokesSecond;
+    Tsoft               20;
+    depth               80;
+    period              10;
+    direction           ( 1 0 0 );
+    phi                 0;
+    height              6;
+    waveNumber          (0.040369292 0 0);
+    omega               0.62831853;
+    debug               0;
+}
+
+inletCurrentCoeffs
+{
+    waveType            potentialCurrent;
+    U                   ( -0.03545 0 0 );
+    Tsoft               20;
+}
+
+outletCoeffs
+{
+    waveType            potentialCurrent;
+    U                   ( 0 0 0 );
+    Tsoft               20;
+
+    relaxationZone
+    {
+        relaxationScheme    Spatial;
+        relaxationShape     Rectangular;
+        beachType           Empty;
+        relaxType           OUTLET;
+        startX              ( 200 -100 -80 );
+        endX                ( 561 100 35 );
+        orientation         ( 1 0 0 );
+    }
+}
+
+
+
+// ************************************************************************* //

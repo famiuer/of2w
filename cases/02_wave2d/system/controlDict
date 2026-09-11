@@ -1,0 +1,57 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+application     waveFoam;
+
+startFrom       latestTime;
+
+startTime       0;
+
+stopAt          endTime;
+
+endTime         300;    // 20 s ramp + tank fill, then steady window 160-300 s
+
+deltaT          0.01;
+
+writeControl    adjustableRunTime;
+
+writeInterval   2;      // field snapshots; gauges write at their own 0.2 s cadence
+
+purgeWrite      2;      // keep the last two field writes; the gauges carry the result
+
+writeFormat     binary;
+
+writePrecision  8;
+
+writeCompression on;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable no;
+
+adjustTimeStep  yes;
+
+maxCo           0.25;   // CrankNicolson 0.9 needs Co<~0.25 for neutral wave propagation
+
+maxAlphaCo      0.25;
+
+maxDeltaT       0.05;
+
+functions
+{
+    #include "surfaceElevation"
+}
+
+// ************************************************************************* //
+
+OptimisationSwitches { fileHandler collated; }

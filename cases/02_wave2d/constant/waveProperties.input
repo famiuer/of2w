@@ -1,0 +1,71 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      environmentalProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+seaLevel	0.00;
+
+relaxationNames (inlet outlet);
+initializationName inlet;
+
+inletCoeffs
+{
+    waveType    combinedWaves;
+    combinedWaveNames (inletWave inletCurrent);
+    Tsoft       20;
+    debug       0;
+    relaxationZone
+    {
+        relaxationScheme Spatial;
+        relaxationShape  Rectangular;
+        beachType        Empty;
+        relaxType   INLET;
+        startX      (-400 -5 -80);
+        endX        (-250  5  35);
+        orientation      (1.0 0.0 0.0);
+    }
+};
+
+inletWaveCoeffs
+{
+    waveType    stokesSecond;
+    Tsoft       20;
+    depth       80;
+    period      10;
+    phi         0.000000;
+    direction  (1.0 0.0 0.0);
+    height      6;
+    debug       0;
+};
+
+inletCurrentCoeffs
+{
+    // return current cancelling the Stokes mass transport: U = -Q/h
+    waveType    potentialCurrent;
+    U           (-0.03545 0 0);
+    Tsoft       20;
+};
+
+outletCoeffs
+{
+    waveType    potentialCurrent;
+    U           (0 0 0);
+    Tsoft       20;
+    relaxationZone
+    {
+        relaxationScheme Spatial;
+        relaxationShape  Rectangular;
+        beachType        Empty;
+        relaxType   OUTLET;
+        startX      (200 -5 -80);
+        endX        (561 5  35);
+        orientation      (1.0 0.0 0.0);
+    }
+};
+// ************************************************************************* //

@@ -1,0 +1,22 @@
+#!/bin/bash
+# slurm.example — template batch script for 06_wave_turbine (adapt the
+# SBATCH lines and the environment block to YOUR cluster, then submit
+# with: sbatch slurm.example). Production reference used 64 ranks.
+#SBATCH -J of2w_wave_turbine
+#SBATCH -N 1
+#SBATCH -n 64
+#SBATCH --mem=96G
+#SBATCH -t 48:00:00
+#SBATCH -o slurm-%x-%j.out
+
+# ---- environment: OpenFOAM v2306 + waves2Foam + the OF2W libraries -------
+# On module-based clusters load the module FIRST, source its bashrc AFTER
+# (non-interactive shells skip it otherwise), then expose the OF2W builds:
+#   module load openfoam/v2306
+#   source "$OPENFOAM_ETC/bashrc"
+#   export LD_LIBRARY_PATH=$HOME/of2w/install/lib:$LD_LIBRARY_PATH
+source /path/to/your/openfoam-2306/etc/bashrc
+
+set -o pipefail
+cd "$SLURM_SUBMIT_DIR"
+NP=${SLURM_NTASKS:-64} ./run.sh

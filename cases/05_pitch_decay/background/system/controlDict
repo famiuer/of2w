@@ -1,0 +1,110 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2306                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// overset: dynamicOversetFvMesh + the overset BC/interpolation machinery.
+// fvMotionSolvers: cellDisplacement infrastructure.
+// rigidBodyMooring: moorDynR2 RBD restraint (also via motionSolverLibs).
+// waveModels: waveVelocity BC + shallowWaterAbsorption (waveProperties).
+libs            (overset fvMotionSolvers "librigidBodyMooring.so" "libwaveModels.so");
+
+application     overInterDyMFoam;
+
+startFrom       latestTime;
+
+startTime       0.0;
+
+stopAt          endTime;
+
+
+// the early consistency checkpoint.
+endTime         120;    // ~4.7 pitch periods
+                        // Local 0.1 s smoke (cellVolumeWeight) confirmed the box-edge
+                        // runaway is gone (|U| peaks ~37 m/s then decays; Co~0.1; Sigma-
+                        // alpha drift ~1e-4 %). First trough ~12.9 s = consistency check.
+
+
+deltaT          0.002;
+
+
+writeControl    adjustableRunTime;
+
+writeInterval   1.0;
+
+purgeWrite      10;             // keep only the last 10 field snapshots (rolling)
+
+writeFormat     binary;
+
+writePrecision  8;
+
+writeCompression on;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable yes;
+
+
+adjustTimeStep  yes;
+maxCo           0.5;
+maxAlphaCo      0.25;
+maxDeltaT       0.02;
+
+functions
+{
+    forces
+    {
+        type            forces;
+        libs            (forces);
+        patches         (float);
+        rhoInf          1025;         
+        log             on;
+        writeControl    timeStep;
+        writeInterval   1;
+        // CofR = body CoG at the IC (design CoG rotated by the +5 deg
+        // pitch); must equal centreOfMass in dynamicMeshDict.
+        CofR            (-1.174 0 -13.408);
+    }
+
+
+    waterVolume
+    {
+        type            volFieldValue;
+        libs            (fieldFunctionObjects);
+        fields          (alpha.water);
+        operation       volIntegrate;
+        regionType      all;
+        writeControl    timeStep;
+        writeInterval   1;         
+        log             on;
+        writeFields     no;
+    }
+
+
+    UMinMax
+    {
+        type            fieldMinMax;
+        libs            (fieldFunctionObjects);
+        fields          (U);
+        mode            magnitude;
+        location        yes;
+        writeControl    timeStep;
+        writeInterval   1;
+        log             on;
+    }
+}
+
+// ************************************************************************* //

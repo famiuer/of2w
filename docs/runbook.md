@@ -3,9 +3,9 @@
 Step-by-step instructions to go from a freshly cloned repo to a running
 OC4-DeepCwind free-decay simulation.
 
-> **Note:** the `cases/oc4-decay-v6` directory referenced below is not yet
-> included in this repository — a curated free-decay reference case (with
-> expected results) will be added in an upcoming release. The build steps
+> **Note:** this runbook predates the shipped test battery and refers to a
+> `cases/oc4-decay-v6` layout; the curated cases now live in `cases/`
+> (overset pitch decay: `cases/05_pitch_decay`). The build steps
 > (sections 0–6) apply as-is.
 
 ## 0. Cluster prep

@@ -1,0 +1,62 @@
+#!/bin/sh
+# Overset mesh assembly, three phases (order matters):
+#   component  : blockMesh -> surfaceFeatureExtract -> snappy -> checkMesh
+#                -> transformPoints (apply the +5 m surge IC to the mesh)
+#   background : blockMesh -> snappy (castellated only)
+#   assembly   : mergeMeshes -> topoSet (c0/c1 zones) -> restore 0/
+#                -> setFields (LAST) -> decomposePar
+# Run from the case root with the OpenFOAM env sourced.
+# Usage: ./mesh   |   NP=<n> ./mesh
+set -u
+TRANSFORM="-translate '(5 0 0)'"     # surge +5 m initial offset
+NP=${NP:-10}
+ROOT=$(cd "$(dirname "$0")" && pwd)
+fail() { echo "ERROR: $1"; exit 1; }
+
+# ---- component mesh (at design pose, then moved to the IC) -----------------
+cd "$ROOT/floatingBody" || fail "cd floatingBody"
+sed -i "s|^numberOfSubdomains[[:space:]]\+[0-9]\+;|numberOfSubdomains  $NP;|" system/decomposeParDict
+rm -rf constant/polyMesh processor* log.*
+[ -f constant/triSurface/float.stl ] || gunzip -k constant/triSurface/float.stl.gz
+
+echo "== component mesh (NP=$NP)"
+blockMesh                > log.blockMesh 2>&1 || fail "blockMesh — see floatingBody/log.blockMesh"
+surfaceFeatureExtract    > log.surfaceFeatureExtract 2>&1 || fail "surfaceFeatureExtract"
+decomposePar -force      > log.decomposePar 2>&1 || fail "decomposePar"
+mpirun -np $NP snappyHexMesh -parallel -overwrite > log.snappyHexMesh 2>&1 || fail "snappyHexMesh — see floatingBody/log.snappyHexMesh"
+reconstructParMesh -constant -mergeTol 1e-6 > log.reconstructParMesh 2>&1 || fail "reconstructParMesh"
+rm -rf processor*
+checkMesh -allTopology -allGeometry > log.checkMesh 2>&1
+# strict -allGeometry flags snappy's concave castellation cells; that one
+# failure is expected — anything else warrants a look at the log.
+grep -E "Failed [0-9]+ mesh checks|Mesh OK" log.checkMesh
+eval "transformPoints $TRANSFORM" > log.transformPoints 2>&1 || fail "transformPoints"
+
+# ---- background mesh (static) ----------------------------------------------
+cd "$ROOT/background" || fail "cd background"
+sed -i "s|^numberOfSubdomains[[:space:]]\+[0-9]\+;|numberOfSubdomains  $NP;|" system/decomposeParDict
+rm -rf constant/polyMesh processor* 0 log.*
+
+echo "== background mesh"
+blockMesh                > log.blockMesh 2>&1 || fail "blockMesh — see background/log.blockMesh"
+decomposePar -force      > log.decomposePar 2>&1 || fail "decomposePar"
+mpirun -np $NP snappyHexMesh -parallel -overwrite > log.snappyHexMesh 2>&1 || fail "snappyHexMesh — see background/log.snappyHexMesh"
+reconstructParMesh -constant -mergeTol 1e-6 > log.reconstructParMesh 2>&1 || fail "reconstructParMesh"
+rm -rf processor*
+
+# ---- assembly ---------------------------------------------------------------
+echo "== assembly (merge + zones + fields)"
+mergeMeshes . ../floatingBody -overwrite > log.mergeMeshes 2>&1 || fail "mergeMeshes"
+checkMesh -allTopology > log.checkMesh.merged 2>&1
+topoSet > log.topoSet 2>&1 || fail "topoSet"
+rm -rf 0 && cp -r 0.orig 0
+setFields > log.setFields 2>&1 || fail "setFields"   # zoneID + alpha, after topoSet
+
+# sanity: every cell must be in exactly one zone (c0 background + c1 component)
+NTOT=$(grep -E "^ *cells:" log.checkMesh.merged | head -1 | awk '{print $2}')
+NC0=$(grep "cellSet c0 now size" log.topoSet | head -1 | awk '{print $NF}')
+NC1=$(grep "cellSet c1 now size" log.topoSet | tail -1 | awk '{print $NF}')
+[ "$((NC0 + NC1))" = "$NTOT" ] || fail "zone split $NC0+$NC1 != $NTOT cells"
+
+decomposePar -force > log.decomposePar.final 2>&1 || fail "decomposePar (final)"
+echo "== done: $NTOT cells, decomposed to $NP ranks"

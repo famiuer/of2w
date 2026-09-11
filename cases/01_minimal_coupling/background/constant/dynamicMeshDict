@@ -1,0 +1,108 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2306                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      dynamicMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+//
+
+dynamicFvMesh       dynamicOversetFvMesh;
+
+motionSolver        rigidBodyMotion;
+
+motionSolverLibs
+(
+    rigidBodyMeshMotion
+    "librigidBodyMooring.so"
+    "libOF2.so"
+);
+
+rigidBodyMotionCoeffs
+{
+    report          on;
+
+    solver
+    {
+        type        Newmark;
+    }
+
+    accelerationRelaxation  0.2;
+    accelerationDamping     1.0;
+
+    bodies
+    {
+        platformBody
+        {
+            type            rigidBody;
+            parent          root;
+
+            // OC4 spec Table 3-3 (platform incl. ballast). CoG = design
+            // (0,0,-13.46) TRANSLATED by the +5 m surge IC -> (5,0,-13.46).
+            // Surge is a pure x-translation (no rotation), so z keeps the
+            // design value (no cos tilt factor). The IC lives in the mesh +
+            // the translated attach points (CoM/fairleads/towerBasePoint).
+            centreOfMass    (5 0 -13.46);
+            mass            1.3473e7;
+            inertia         (6.827e9 0 0 6.827e9 0 1.226e10);
+
+            // Identity: q(0)=0; the +5 m surge IC lives in the mesh geometry
+            // (component translated +5 m in x) and the translated attach
+            // points (CoM/fairleads/towerBasePoint). The OF2 coupling adds the
+            // IC to the position it imposes on OpenFAST via the restraint's
+            // `initialSurge` entry, so ElastoDyn sees the true +5 m surge.
+            transform       (1 0 0 0 1 0 0 0 1) (0 0 0);
+
+            joint           { type Px; }
+
+            patches         (float);
+
+
+            innerDistance   100;
+            outerDistance   101;
+        }
+    }
+
+    restraints
+    {
+        mooring
+        {
+            type             moorDynR2;
+            body             platformBody;
+            couplingMode     "BODY";
+            inputFile        "Mooring/lines_oc4.txt";
+            bodies           ( platformBody );
+            writeMooringVTK  false;
+            vtkPrefix        "oc4_overset_pitch";   // unused while VTK off
+            vtkStartTime     0;
+            outerCorrector   3;
+        }
+
+
+        aero
+        {
+            type             OpenFast;
+            body             platformBody;
+            fstFile          "openfast/derisk.fst";
+            towerBasePoint   (5 0 10);
+
+            initialSurge     5;
+            initialSway      0;
+            initialHeave     0;
+            initialRoll      0;
+            initialPitch     0;
+            initialYaw       0;
+            verbose          true;
+        }
+    }
+}
+
+// ************************************************************************* //

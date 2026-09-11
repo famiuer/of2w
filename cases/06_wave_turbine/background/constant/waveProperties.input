@@ -1,0 +1,54 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+\*---------------------------------------------------------------------------*/
+FoamFile { version 2.0; format ascii; class dictionary; object environmentalProperties; }
+
+seaLevel	0.00;
+
+relaxationNames (inlet outlet);
+
+initializationName outlet;
+
+inletCoeffs
+{
+    waveType    stokesSecond;
+    Tsoft       20;
+    depth       80;
+    period      10;
+    phi         1.773253;   // t*=300.7 s sync (openfast_lc3p1wave baseline)
+    direction  (1.0 0.0 0.0);
+    height      6.00;       // v4p1: input = target (A4 measured loss-free delivery, ratio ~1.03 -> expect ~6.1-6.2 delivered, inside the +/-5% gate)
+    debug       0;
+    relaxationZone
+    {
+        relaxationScheme Spatial;
+        relaxationShape  Rectangular;
+        beachType        Empty;
+        relaxType   INLET;
+        startX      (-400 -100 -80);   // full depth (v6 lesson)
+        endX        (-250  100  35);
+        orientation      (1.0 0.0 0.0);
+        exponent    2.0;               // R3 (default 3.5)
+        courantCorrection yes;         // R3 (needs maxCo in controlDict: present)
+    }
+};
+
+outletCoeffs
+{
+    waveType    potentialCurrent;      // v4: flat still-water target (rgb/waveFlume)
+    U           (0 0 0);
+    Tsoft       20;
+    relaxationZone
+    {
+        relaxationScheme Spatial;
+        relaxationShape  Rectangular;
+        beachType        Empty;
+        relaxType   OUTLET;
+        startX      (200 -100 -80);
+        endX        (561  100  35);
+        orientation      (1.0 0.0 0.0);
+        exponent    2.0;               // R3
+        courantCorrection yes;         // R3
+    }
+};
+
+// ************************************************************************* //

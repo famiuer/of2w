@@ -1,0 +1,15 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      motionProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Static tank (waveFoam constructs a dynamicFvMesh; no motion here).
+
+dynamicFvMesh    staticFvMesh;
+
+// ************************************************************************* //

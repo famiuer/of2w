@@ -1,0 +1,70 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2306                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    object      p_rgh;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [1 -1 -2 0 0 0 0];
+
+internalField   uniform 0;
+
+boundaryField
+{
+    inlet
+    {
+        type            fixedFluxPressure;
+        value           $internalField;
+    }
+
+    outlet
+    {
+        type            fixedFluxPressure;
+        value           $internalField;
+    }
+
+    sides
+    {
+        type            fixedFluxPressure;
+        value           $internalField;
+    }
+
+    bottom
+    {
+        type            symmetry;
+    }
+
+    top
+    {
+        type            totalPressure;
+        p0              uniform 0;
+    }
+
+    float
+    {
+        type            fixedFluxPressure;
+        value           $internalField;
+    }
+
+    // type overset (NOT zeroGradient): the oversetFvPatchField injects the
+    // implicit fringe-interpolation rows into the p_rgh matrix. With
+    // zeroGradient the pressure fringe is uncoupled -> symmetric singular
+    // system -> solver divergence at step 1 (run 1 of this case).
+    oversetPatch
+    {
+        patchType       overset;
+        type            overset;
+    }
+}
+
+
+// ************************************************************************* //

@@ -28,6 +28,7 @@ aerodynamics) is applied back on the CFD body.
 |---|---|
 | `coupling/` | solver-agnostic core + OpenFOAM restraint plugins (`of2Restraint`, mooring), unit tests |
 | `solvers/overWaveDyMFoam/` | overset VOF 6-DOF solver with waves2Foam relaxation zones |
+| `cases/` | test battery: minimal coupled+restart, wave 2D/3D, wave+current, pitch decay vs OpenFAST, waves+turbine showcase |
 | `external/` | pinned submodules: OpenFAST, waves2Foam, MoorDyn, foamMooring |
 | `tools/`, `docs/` | baseline comparison scripts, architecture and interface notes |
 
@@ -40,8 +41,11 @@ cd of2
 # see INSTALL.md
 ```
 
-A reference case (OC4 free decay, with expected results for validation)
-will be added in an upcoming release.
+Run the test cases: `cases/` contains six self-contained cases — from a
+minutes-scale minimal coupled run (with restart) through wave/wave-current
+tank validation and an OC4 pitch free decay vs an OpenFAST baseline, to
+the full waves+turbine showcase. Each has a `run.sh` and (01-05) a
+`check.py` with documented expected results; see `cases/README.md`.
 
 Notes for coupled OpenFAST decks: `CompHydro=0` and `CompMooring=0` (the CFD
 owns both), and **`ModCoupling=1`** — the platform-state injection requires

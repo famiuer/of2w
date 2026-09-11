@@ -1,0 +1,177 @@
+// Wave gauges via waves2Foam surfaceElevation: eta for ALL gauges appended to
+// ONE file (postProcessing/surfaceElevation/<t0>/surfaceElevation.dat) instead
+// of one file per gauge per instant (the old sets-based etaSampling wrote
+// ~200k tiny files per run and made post-processing I/O-bound).
+surfaceElevation
+{
+    type            surfaceElevation;
+    libs            ("libwaves2FoamSampling.so");
+    writeControl    adjustableRunTime;
+    writeInterval   0.2;
+    setFormat       raw;
+    interpolationScheme cellPoint;
+    fields          (alpha.water);
+    sets
+    (
+        g000 { type uniform; axis z; start (-396.0 0 -12); end (-396.0 0 12); nPoints 200; }
+        g001 { type uniform; axis z; start (-390.0 0 -12); end (-390.0 0 12); nPoints 200; }
+        g002 { type uniform; axis z; start (-384.0 0 -12); end (-384.0 0 12); nPoints 200; }
+        g003 { type uniform; axis z; start (-378.0 0 -12); end (-378.0 0 12); nPoints 200; }
+        g004 { type uniform; axis z; start (-372.0 0 -12); end (-372.0 0 12); nPoints 200; }
+        g005 { type uniform; axis z; start (-366.0 0 -12); end (-366.0 0 12); nPoints 200; }
+        g006 { type uniform; axis z; start (-360.0 0 -12); end (-360.0 0 12); nPoints 200; }
+        g007 { type uniform; axis z; start (-354.0 0 -12); end (-354.0 0 12); nPoints 200; }
+        g008 { type uniform; axis z; start (-348.0 0 -12); end (-348.0 0 12); nPoints 200; }
+        g009 { type uniform; axis z; start (-342.0 0 -12); end (-342.0 0 12); nPoints 200; }
+        g010 { type uniform; axis z; start (-336.0 0 -12); end (-336.0 0 12); nPoints 200; }
+        g011 { type uniform; axis z; start (-330.0 0 -12); end (-330.0 0 12); nPoints 200; }
+        g012 { type uniform; axis z; start (-324.0 0 -12); end (-324.0 0 12); nPoints 200; }
+        g013 { type uniform; axis z; start (-318.0 0 -12); end (-318.0 0 12); nPoints 200; }
+        g014 { type uniform; axis z; start (-312.0 0 -12); end (-312.0 0 12); nPoints 200; }
+        g015 { type uniform; axis z; start (-306.0 0 -12); end (-306.0 0 12); nPoints 200; }
+        g016 { type uniform; axis z; start (-300.0 0 -12); end (-300.0 0 12); nPoints 200; }
+        g017 { type uniform; axis z; start (-294.0 0 -12); end (-294.0 0 12); nPoints 200; }
+        g018 { type uniform; axis z; start (-288.0 0 -12); end (-288.0 0 12); nPoints 200; }
+        g019 { type uniform; axis z; start (-282.0 0 -12); end (-282.0 0 12); nPoints 200; }
+        g020 { type uniform; axis z; start (-276.0 0 -12); end (-276.0 0 12); nPoints 200; }
+        g021 { type uniform; axis z; start (-270.0 0 -12); end (-270.0 0 12); nPoints 200; }
+        g022 { type uniform; axis z; start (-264.0 0 -12); end (-264.0 0 12); nPoints 200; }
+        g023 { type uniform; axis z; start (-258.0 0 -12); end (-258.0 0 12); nPoints 200; }
+        g024 { type uniform; axis z; start (-252.0 0 -12); end (-252.0 0 12); nPoints 200; }
+        g025 { type uniform; axis z; start (-246.0 0 -12); end (-246.0 0 12); nPoints 200; }
+        g026 { type uniform; axis z; start (-240.0 0 -12); end (-240.0 0 12); nPoints 200; }
+        g027 { type uniform; axis z; start (-234.0 0 -12); end (-234.0 0 12); nPoints 200; }
+        g028 { type uniform; axis z; start (-228.0 0 -12); end (-228.0 0 12); nPoints 200; }
+        g029 { type uniform; axis z; start (-222.0 0 -12); end (-222.0 0 12); nPoints 200; }
+        g030 { type uniform; axis z; start (-216.0 0 -12); end (-216.0 0 12); nPoints 200; }
+        g031 { type uniform; axis z; start (-210.0 0 -12); end (-210.0 0 12); nPoints 200; }
+        g032 { type uniform; axis z; start (-204.0 0 -12); end (-204.0 0 12); nPoints 200; }
+        g033 { type uniform; axis z; start (-198.0 0 -12); end (-198.0 0 12); nPoints 200; }
+        g034 { type uniform; axis z; start (-192.0 0 -12); end (-192.0 0 12); nPoints 200; }
+        g035 { type uniform; axis z; start (-186.0 0 -12); end (-186.0 0 12); nPoints 200; }
+        g036 { type uniform; axis z; start (-180.0 0 -12); end (-180.0 0 12); nPoints 200; }
+        g037 { type uniform; axis z; start (-174.0 0 -12); end (-174.0 0 12); nPoints 200; }
+        g038 { type uniform; axis z; start (-168.0 0 -12); end (-168.0 0 12); nPoints 200; }
+        g039 { type uniform; axis z; start (-162.0 0 -12); end (-162.0 0 12); nPoints 200; }
+        g040 { type uniform; axis z; start (-156.0 0 -12); end (-156.0 0 12); nPoints 200; }
+        g041 { type uniform; axis z; start (-150.0 0 -12); end (-150.0 0 12); nPoints 200; }
+        g042 { type uniform; axis z; start (-144.0 0 -12); end (-144.0 0 12); nPoints 200; }
+        g043 { type uniform; axis z; start (-138.0 0 -12); end (-138.0 0 12); nPoints 200; }
+        g044 { type uniform; axis z; start (-132.0 0 -12); end (-132.0 0 12); nPoints 200; }
+        g045 { type uniform; axis z; start (-126.0 0 -12); end (-126.0 0 12); nPoints 200; }
+        g046 { type uniform; axis z; start (-120.0 0 -12); end (-120.0 0 12); nPoints 200; }
+        g047 { type uniform; axis z; start (-114.0 0 -12); end (-114.0 0 12); nPoints 200; }
+        g048 { type uniform; axis z; start (-108.0 0 -12); end (-108.0 0 12); nPoints 200; }
+        g049 { type uniform; axis z; start (-102.0 0 -12); end (-102.0 0 12); nPoints 200; }
+        g050 { type uniform; axis z; start (-96.0 0 -12); end (-96.0 0 12); nPoints 200; }
+        g051 { type uniform; axis z; start (-90.0 0 -12); end (-90.0 0 12); nPoints 200; }
+        g052 { type uniform; axis z; start (-84.0 0 -12); end (-84.0 0 12); nPoints 200; }
+        g053 { type uniform; axis z; start (-78.0 0 -12); end (-78.0 0 12); nPoints 200; }
+        g054 { type uniform; axis z; start (-72.0 0 -12); end (-72.0 0 12); nPoints 200; }
+        g055 { type uniform; axis z; start (-66.0 0 -12); end (-66.0 0 12); nPoints 200; }
+        g056 { type uniform; axis z; start (-60.0 0 -12); end (-60.0 0 12); nPoints 200; }
+        g057 { type uniform; axis z; start (-54.0 0 -12); end (-54.0 0 12); nPoints 200; }
+        g058 { type uniform; axis z; start (-48.0 0 -12); end (-48.0 0 12); nPoints 200; }
+        g059 { type uniform; axis z; start (-42.0 0 -12); end (-42.0 0 12); nPoints 200; }
+        g060 { type uniform; axis z; start (-36.0 0 -12); end (-36.0 0 12); nPoints 200; }
+        g061 { type uniform; axis z; start (-30.0 0 -12); end (-30.0 0 12); nPoints 200; }
+        g062 { type uniform; axis z; start (-24.0 0 -12); end (-24.0 0 12); nPoints 200; }
+        g063 { type uniform; axis z; start (-18.0 0 -12); end (-18.0 0 12); nPoints 200; }
+        g064 { type uniform; axis z; start (-12.0 0 -12); end (-12.0 0 12); nPoints 200; }
+        g065 { type uniform; axis z; start (-6.0 0 -12); end (-6.0 0 12); nPoints 200; }
+        g066 { type uniform; axis z; start (0.0 0 -12); end (0.0 0 12); nPoints 200; }
+        g067 { type uniform; axis z; start (6.0 0 -12); end (6.0 0 12); nPoints 200; }
+        g068 { type uniform; axis z; start (12.0 0 -12); end (12.0 0 12); nPoints 200; }
+        g069 { type uniform; axis z; start (18.0 0 -12); end (18.0 0 12); nPoints 200; }
+        g070 { type uniform; axis z; start (24.0 0 -12); end (24.0 0 12); nPoints 200; }
+        g071 { type uniform; axis z; start (30.0 0 -12); end (30.0 0 12); nPoints 200; }
+        g072 { type uniform; axis z; start (36.0 0 -12); end (36.0 0 12); nPoints 200; }
+        g073 { type uniform; axis z; start (42.0 0 -12); end (42.0 0 12); nPoints 200; }
+        g074 { type uniform; axis z; start (48.0 0 -12); end (48.0 0 12); nPoints 200; }
+        g075 { type uniform; axis z; start (54.0 0 -12); end (54.0 0 12); nPoints 200; }
+        g076 { type uniform; axis z; start (60.0 0 -12); end (60.0 0 12); nPoints 200; }
+        g077 { type uniform; axis z; start (66.0 0 -12); end (66.0 0 12); nPoints 200; }
+        g078 { type uniform; axis z; start (72.0 0 -12); end (72.0 0 12); nPoints 200; }
+        g079 { type uniform; axis z; start (78.0 0 -12); end (78.0 0 12); nPoints 200; }
+        g080 { type uniform; axis z; start (84.0 0 -12); end (84.0 0 12); nPoints 200; }
+        g081 { type uniform; axis z; start (90.0 0 -12); end (90.0 0 12); nPoints 200; }
+        g082 { type uniform; axis z; start (96.0 0 -12); end (96.0 0 12); nPoints 200; }
+        g083 { type uniform; axis z; start (102.0 0 -12); end (102.0 0 12); nPoints 200; }
+        g084 { type uniform; axis z; start (108.0 0 -12); end (108.0 0 12); nPoints 200; }
+        g085 { type uniform; axis z; start (114.0 0 -12); end (114.0 0 12); nPoints 200; }
+        g086 { type uniform; axis z; start (120.0 0 -12); end (120.0 0 12); nPoints 200; }
+        g087 { type uniform; axis z; start (126.0 0 -12); end (126.0 0 12); nPoints 200; }
+        g088 { type uniform; axis z; start (132.0 0 -12); end (132.0 0 12); nPoints 200; }
+        g089 { type uniform; axis z; start (138.0 0 -12); end (138.0 0 12); nPoints 200; }
+        g090 { type uniform; axis z; start (144.0 0 -12); end (144.0 0 12); nPoints 200; }
+        g091 { type uniform; axis z; start (150.0 0 -12); end (150.0 0 12); nPoints 200; }
+        g092 { type uniform; axis z; start (156.0 0 -12); end (156.0 0 12); nPoints 200; }
+        g093 { type uniform; axis z; start (162.0 0 -12); end (162.0 0 12); nPoints 200; }
+        g094 { type uniform; axis z; start (168.0 0 -12); end (168.0 0 12); nPoints 200; }
+        g095 { type uniform; axis z; start (174.0 0 -12); end (174.0 0 12); nPoints 200; }
+        g096 { type uniform; axis z; start (180.0 0 -12); end (180.0 0 12); nPoints 200; }
+        g097 { type uniform; axis z; start (186.0 0 -12); end (186.0 0 12); nPoints 200; }
+        g098 { type uniform; axis z; start (192.0 0 -12); end (192.0 0 12); nPoints 200; }
+        g099 { type uniform; axis z; start (198.0 0 -12); end (198.0 0 12); nPoints 200; }
+        g100 { type uniform; axis z; start (204.0 0 -12); end (204.0 0 12); nPoints 200; }
+        g101 { type uniform; axis z; start (210.0 0 -12); end (210.0 0 12); nPoints 200; }
+        g102 { type uniform; axis z; start (216.0 0 -12); end (216.0 0 12); nPoints 200; }
+        g103 { type uniform; axis z; start (222.0 0 -12); end (222.0 0 12); nPoints 200; }
+        g104 { type uniform; axis z; start (228.0 0 -12); end (228.0 0 12); nPoints 200; }
+        g105 { type uniform; axis z; start (234.0 0 -12); end (234.0 0 12); nPoints 200; }
+        g106 { type uniform; axis z; start (240.0 0 -12); end (240.0 0 12); nPoints 200; }
+        g107 { type uniform; axis z; start (246.0 0 -12); end (246.0 0 12); nPoints 200; }
+        g108 { type uniform; axis z; start (252.0 0 -12); end (252.0 0 12); nPoints 200; }
+        g109 { type uniform; axis z; start (258.0 0 -12); end (258.0 0 12); nPoints 200; }
+        g110 { type uniform; axis z; start (264.0 0 -12); end (264.0 0 12); nPoints 200; }
+        g111 { type uniform; axis z; start (270.0 0 -12); end (270.0 0 12); nPoints 200; }
+        g112 { type uniform; axis z; start (276.0 0 -12); end (276.0 0 12); nPoints 200; }
+        g113 { type uniform; axis z; start (282.0 0 -12); end (282.0 0 12); nPoints 200; }
+        g114 { type uniform; axis z; start (288.0 0 -12); end (288.0 0 12); nPoints 200; }
+        g115 { type uniform; axis z; start (294.0 0 -12); end (294.0 0 12); nPoints 200; }
+        g116 { type uniform; axis z; start (300.0 0 -12); end (300.0 0 12); nPoints 200; }
+        g117 { type uniform; axis z; start (306.0 0 -12); end (306.0 0 12); nPoints 200; }
+        g118 { type uniform; axis z; start (312.0 0 -12); end (312.0 0 12); nPoints 200; }
+        g119 { type uniform; axis z; start (318.0 0 -12); end (318.0 0 12); nPoints 200; }
+        g120 { type uniform; axis z; start (324.0 0 -12); end (324.0 0 12); nPoints 200; }
+        g121 { type uniform; axis z; start (330.0 0 -12); end (330.0 0 12); nPoints 200; }
+        g122 { type uniform; axis z; start (336.0 0 -12); end (336.0 0 12); nPoints 200; }
+        g123 { type uniform; axis z; start (342.0 0 -12); end (342.0 0 12); nPoints 200; }
+        g124 { type uniform; axis z; start (348.0 0 -12); end (348.0 0 12); nPoints 200; }
+        g125 { type uniform; axis z; start (354.0 0 -12); end (354.0 0 12); nPoints 200; }
+        g126 { type uniform; axis z; start (360.0 0 -12); end (360.0 0 12); nPoints 200; }
+        g127 { type uniform; axis z; start (366.0 0 -12); end (366.0 0 12); nPoints 200; }
+        g128 { type uniform; axis z; start (372.0 0 -12); end (372.0 0 12); nPoints 200; }
+        g129 { type uniform; axis z; start (378.0 0 -12); end (378.0 0 12); nPoints 200; }
+        g130 { type uniform; axis z; start (384.0 0 -12); end (384.0 0 12); nPoints 200; }
+        g131 { type uniform; axis z; start (390.0 0 -12); end (390.0 0 12); nPoints 200; }
+        g132 { type uniform; axis z; start (396.0 0 -12); end (396.0 0 12); nPoints 200; }
+        g133 { type uniform; axis z; start (402.0 0 -12); end (402.0 0 12); nPoints 200; }
+        g134 { type uniform; axis z; start (408.0 0 -12); end (408.0 0 12); nPoints 200; }
+        g135 { type uniform; axis z; start (414.0 0 -12); end (414.0 0 12); nPoints 200; }
+        g136 { type uniform; axis z; start (420.0 0 -12); end (420.0 0 12); nPoints 200; }
+        g137 { type uniform; axis z; start (426.0 0 -12); end (426.0 0 12); nPoints 200; }
+        g138 { type uniform; axis z; start (432.0 0 -12); end (432.0 0 12); nPoints 200; }
+        g139 { type uniform; axis z; start (438.0 0 -12); end (438.0 0 12); nPoints 200; }
+        g140 { type uniform; axis z; start (444.0 0 -12); end (444.0 0 12); nPoints 200; }
+        g141 { type uniform; axis z; start (450.0 0 -12); end (450.0 0 12); nPoints 200; }
+        g142 { type uniform; axis z; start (456.0 0 -12); end (456.0 0 12); nPoints 200; }
+        g143 { type uniform; axis z; start (462.0 0 -12); end (462.0 0 12); nPoints 200; }
+        g144 { type uniform; axis z; start (468.0 0 -12); end (468.0 0 12); nPoints 200; }
+        g145 { type uniform; axis z; start (474.0 0 -12); end (474.0 0 12); nPoints 200; }
+        g146 { type uniform; axis z; start (480.0 0 -12); end (480.0 0 12); nPoints 200; }
+        g147 { type uniform; axis z; start (486.0 0 -12); end (486.0 0 12); nPoints 200; }
+        g148 { type uniform; axis z; start (492.0 0 -12); end (492.0 0 12); nPoints 200; }
+        g149 { type uniform; axis z; start (498.0 0 -12); end (498.0 0 12); nPoints 200; }
+        g150 { type uniform; axis z; start (504.0 0 -12); end (504.0 0 12); nPoints 200; }
+        g151 { type uniform; axis z; start (510.0 0 -12); end (510.0 0 12); nPoints 200; }
+        g152 { type uniform; axis z; start (516.0 0 -12); end (516.0 0 12); nPoints 200; }
+        g153 { type uniform; axis z; start (522.0 0 -12); end (522.0 0 12); nPoints 200; }
+        g154 { type uniform; axis z; start (528.0 0 -12); end (528.0 0 12); nPoints 200; }
+        g155 { type uniform; axis z; start (534.0 0 -12); end (534.0 0 12); nPoints 200; }
+        g156 { type uniform; axis z; start (540.0 0 -12); end (540.0 0 12); nPoints 200; }
+        g157 { type uniform; axis z; start (546.0 0 -12); end (546.0 0 12); nPoints 200; }
+        g158 { type uniform; axis z; start (552.0 0 -12); end (552.0 0 12); nPoints 200; }
+        g159 { type uniform; axis z; start (558.0 0 -12); end (558.0 0 12); nPoints 200; }
+    );
+}

@@ -1,0 +1,130 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2206                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvSolution;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+solvers
+{
+    "alpha.water.*"
+    {
+        nAlphaCorr      3;
+
+        nAlphaSubCycles 1;
+        cAlpha          1;
+        icAlpha         0;
+
+        MULESCorr       yes;
+        nLimiterIter    25;
+        alphaApplyPrevCorr  yes;
+
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
+        tolerance       1e-8;
+        relTol          0;
+        minIter         1;
+    }
+
+    "pcorr.*"
+    {
+        solver          PCG;
+        preconditioner
+        {
+            preconditioner  GAMG;
+            smoother        GaussSeidel;
+            tolerance       1e-5;
+            relTol          0;
+        };
+        tolerance       1e-5;
+        relTol          0;
+    };
+
+    p_rgh
+    {
+        solver          GAMG;
+        smoother        DIC;
+        tolerance       1e-7;
+        relTol          0.01;
+    };
+
+    p_rghFinal
+    {
+        $p_rgh;
+        relTol          0;
+    }
+
+    "(U|k|omega).*"
+    {
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
+        nSweeps         1;
+        tolerance       1e-7;
+        relTol          0.1;
+        minIter         1;
+    };
+}
+
+PIMPLE
+{
+    momentumPredictor   yes;
+
+    // Implicit fluid-structure coupling: iterate pressure-velocity AND the
+    // body motion / mesh deformation each time step. Single-corrector (the
+    // original nOuterCorrectors 1) is explicit PISO coupling and is fragile
+    // for a heavy body with large added mass.
+    // v6: backed off from v5's 10 to 8. With outerCorrectorResidualControl
+    // below, this is a CAP, not a fixed cost — converged steps exit early.
+    // Kept above yaw's 3 because pitch carries much larger added-mass
+    // coupling (vertical interface motion) than yaw does. The v5 crash-mode
+    // is addressed by the mesh changes (dynamicMeshDict innerDistance 1.5 /
+    // outerDistance 14, blockMeshDict top +30, snappy FS boxes), not by
+    // outer-corrector brute force.
+    nOuterCorrectors    8;
+    nCorrectors         3;
+    nNonOrthogonalCorrectors 1;
+
+    // Recompute the 6-DOF response / mesh motion inside the outer loop so the
+    // pressure field and body acceleration converge together each step.
+    moveMeshOuterCorrectors yes;
+
+    // Exit the outer loop early once residuals are tight.
+    outerCorrectorResidualControl
+    {
+        p_rgh
+        {
+            tolerance   5e-5;
+            relTol      0;
+        }
+        "(U|alpha.water)"
+        {
+            tolerance   1e-6;
+            relTol      0;
+        }
+    }
+}
+
+relaxationFactors
+{
+    equations
+    {
+        ".*" 1;
+    }
+}
+
+cache
+{
+    grad(U);
+}
+
+
+// ************************************************************************* //

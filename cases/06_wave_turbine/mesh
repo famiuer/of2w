@@ -1,0 +1,68 @@
+#!/bin/sh
+# Overset mesh assembly + wave-deck preparation (order matters):
+#   component  : blockMesh -> surfaceFeatureExtract -> snappy -> checkMesh
+#                -> transformPoints ROTATE then TRANSLATE (the wave-
+#                  equilibrium IC pose; two calls, a single combined call
+#                  would rotate about the wrong origin)
+#   background : blockMesh only (the graded wave-tank background is already
+#                at donor resolution)
+#   assembly   : mergeMeshes -> topoSet (c0/c1 zones) -> restore 0/
+#                -> setWaveParameters -> setFields -> decomposePar.
+#                NO setWaveField: the tank starts STILL; waves develop from
+#                rest through the inlet relaxation zone (run.sh leg A).
+# Run from the case root with the OpenFOAM + waves2Foam env sourced.
+# Usage: ./mesh   |   NP=<n> ./mesh
+set -u
+TRANSFORM_ROT="-origin '(0 0 0)' -rotate-angle '((0 1 0) 0.76184)'"
+TRANSFORM_TRANS="-translate '(6.32582 0 0.03021)'"
+NP=${NP:-16}
+ROOT=$(cd "$(dirname "$0")" && pwd)
+fail() { echo "ERROR: $1"; exit 1; }
+command -v setWaveParameters >/dev/null || fail "waves2Foam not in PATH"
+
+# ---- component mesh (at design pose, then moved to the IC pose) ------------
+cd "$ROOT/floatingBody" || fail "cd floatingBody"
+sed -i "s|^numberOfSubdomains[[:space:]]\+[0-9]\+;|numberOfSubdomains  $NP;|" system/decomposeParDict
+rm -rf constant/polyMesh processor* log.*
+[ -f constant/triSurface/float.stl ] || gunzip -k constant/triSurface/float.stl.gz
+
+echo "== component mesh (NP=$NP)"
+blockMesh                > log.blockMesh 2>&1 || fail "blockMesh — see floatingBody/log.blockMesh"
+surfaceFeatureExtract    > log.surfaceFeatureExtract 2>&1 || fail "surfaceFeatureExtract"
+decomposePar -force      > log.decomposePar 2>&1 || fail "decomposePar"
+mpirun -np $NP snappyHexMesh -parallel -overwrite > log.snappyHexMesh 2>&1 || fail "snappyHexMesh — see floatingBody/log.snappyHexMesh"
+reconstructParMesh -constant -mergeTol 1e-6 > log.reconstructParMesh 2>&1 || fail "reconstructParMesh"
+rm -rf processor*
+checkMesh -allTopology -allGeometry > log.checkMesh 2>&1
+# strict -allGeometry flags snappy's concave castellation cells; that one
+# failure is expected — anything else warrants a look at the log.
+grep -E "Failed [0-9]+ mesh checks|Mesh OK" log.checkMesh
+eval "transformPoints $TRANSFORM_ROT"   > log.transformPoints.rot 2>&1 || fail "transformPoints (rotate)"
+eval "transformPoints $TRANSFORM_TRANS" > log.transformPoints.trans 2>&1 || fail "transformPoints (translate)"
+
+# ---- background mesh (static wave tank, blockMesh only) --------------------
+cd "$ROOT/background" || fail "cd background"
+sed -i "s|^numberOfSubdomains[[:space:]]\+[0-9]\+;|numberOfSubdomains  $NP;|" system/decomposeParDict
+rm -rf constant/polyMesh processor* 0 log.*
+
+echo "== background mesh"
+blockMesh > log.blockMesh 2>&1 || fail "blockMesh — see background/log.blockMesh"
+
+# ---- assembly + wave deck ---------------------------------------------------
+echo "== assembly (merge + zones + wave deck + fields)"
+mergeMeshes . ../floatingBody -overwrite > log.mergeMeshes 2>&1 || fail "mergeMeshes"
+checkMesh -allTopology > log.checkMesh.merged 2>&1
+topoSet > log.topoSet 2>&1 || fail "topoSet"
+rm -rf 0 && cp -r 0.orig 0
+cp constant/waveProperties.input constant/waveProperties
+setWaveParameters > log.setWaveParameters 2>&1 || fail "setWaveParameters"
+setFields > log.setFields 2>&1 || fail "setFields"   # zoneID + hydrostatic alpha
+
+# sanity: every cell must be in exactly one zone (c0 background + c1 component)
+NTOT=$(grep -E "^ *cells:" log.checkMesh.merged | head -1 | awk '{print $2}')
+NC0=$(grep "cellSet c0 now size" log.topoSet | head -1 | awk '{print $NF}')
+NC1=$(grep "cellSet c1 now size" log.topoSet | tail -1 | awk '{print $NF}')
+[ "$((NC0 + NC1))" = "$NTOT" ] || fail "zone split $NC0+$NC1 != $NTOT cells"
+
+decomposePar -force > log.decomposePar.final 2>&1 || fail "decomposePar (final)"
+echo "== done: $NTOT cells, decomposed to $NP ranks"

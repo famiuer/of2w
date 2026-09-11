@@ -1,0 +1,92 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2306                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvSchemes;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+ddtSchemes
+{
+
+    default         Euler;
+}
+
+gradSchemes
+{
+    default         Gauss linear;
+    limitedGrad     cellLimited Gauss linear 1;
+    grad(U)         cellLimited Gauss linear 1;
+}
+
+divSchemes
+{
+    div(rhoPhi,U)   Gauss linearUpwindV grad(U);
+    div(U)          Gauss linear;
+    div(phi,alpha)  Gauss vanLeer;
+    div(phirb,alpha) Gauss linear;
+    div(((rho*nuEff)*dev2(T(grad(U))))) Gauss linear;
+
+    div(phi,k)      Gauss upwind;
+    div(phi,epsilon) Gauss upwind;
+    div(phi,omega) Gauss upwind;
+}
+
+laplacianSchemes
+{
+    default         Gauss linear limited 0.5;
+}
+
+interpolationSchemes
+{
+    default         linear;
+}
+
+snGradSchemes
+{
+    default         limited 0.5;
+}
+
+// Overset donor/acceptor interpolation.
+oversetInterpolation
+{
+    // v8c: cellVolumeWeight (overlap-volume-weighted) instead of inverseDistance
+    // + useLayer 3. The tilted (+5 deg pitch) component box has a fringe that is
+    // MISALIGNED with the Cartesian background; at the box vertical EDGES where
+    // the fringe crosses the free surface, inverseDistance with useLayer 3 pulls
+    // donors 3 layers deep — sideways into cells of the OTHER phase — seeding a
+    // spurious velocity that grows in the light air phase (the v7/v8a/v8b corner
+    // runaway, always at a box edge at the waterline, never mid-face).
+    // cellVolumeWeight is consistency-weighted by overlap volume and is ESI's
+    // robust default for non-aligned moving overset; it does not use useLayer.
+    method          cellVolumeWeight;
+}
+
+oversetInterpolationSuppressed
+{
+    grad(p_rgh);
+    surfaceIntegrate(phiHbyA);
+}
+
+wallDist
+{
+    method          meshWave;
+}
+
+fluxRequired
+{
+    default         no;
+    p_rgh;
+    pcorr;
+    alpha.water;
+}
+
+// ************************************************************************* //

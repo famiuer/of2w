@@ -1,0 +1,107 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2306                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// overset: dynamicOversetFvMesh + the overset BC/interpolation machinery.
+// fvMotionSolvers: cellDisplacement infrastructure.
+// rigidBodyMooring: moorDynR2 RBD restraint (also via motionSolverLibs).
+// waveModels: waveVelocity BC + shallowWaterAbsorption (waveProperties).
+libs            (overset fvMotionSolvers "librigidBodyMooring.so" "libwaveModels.so");
+
+application     overInterDyMFoam;
+
+startFrom       latestTime;
+
+startTime       0.0;
+
+stopAt          endTime;
+
+
+writeControl    adjustableRunTime;
+
+writeInterval   0.5;
+
+purgeWrite      10;             // keep only the last 10 field snapshots (rolling)
+
+writeFormat     binary;
+
+writePrecision  8;
+
+writeCompression on;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable yes;
+
+
+adjustTimeStep  yes;
+maxCo           0.5;
+maxAlphaCo      0.25;
+maxDeltaT       0.02;
+
+functions
+{
+    rigidBodyState
+    {
+        // restart phase 1: write uniform/rigidBodyMotionState (overset gap)
+        type            of2RigidBodyStateWriter;
+        libs            ("libOF2.so");
+        writeControl    writeTime;
+    }
+    forces
+    {
+        type            forces;
+        libs            (forces);
+        patches         (float);
+        rhoInf          1025;          // matches transportProperties.water.rho
+        log             on;
+        writeControl    timeStep;
+        writeInterval   1;
+        // CofR = body CoG at IC = centreOfMass in dynamicMeshDict
+        // (= design CoG (0 0 -13.46) + (5,0,0) surge IC).
+        CofR            (5 0 -13.46);
+    }
+
+
+    waterVolume
+    {
+        type            volFieldValue;
+        libs            (fieldFunctionObjects);
+        fields          (alpha.water);
+        operation       volIntegrate;
+        regionType      all;
+        writeControl    timeStep;
+        writeInterval   1;          // v7 (checklist S1.1): Sigma-alpha every step
+        log             on;
+        writeFields     no;
+    }
+
+
+    UMinMax
+    {
+        type            fieldMinMax;
+        libs            (fieldFunctionObjects);
+        fields          (U);
+        mode            magnitude;
+        location        yes;
+        writeControl    timeStep;
+        writeInterval   1;
+        log             on;
+    }
+}
+
+// ************************************************************************* //

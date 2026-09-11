@@ -151,9 +151,10 @@ rather than silently build against the wrong OpenFAST).
 
 ## 7 · Run the reference case
 
-A reference case (OC4 free decay, with expected results for validation)
-will be added in an upcoming release. The unit tests of the coupling
-core can be run now:
+The test cases live in `cases/` (see `cases/README.md`; start with
+`cases/01_minimal_coupling`, a minutes-scale full-coupling check with
+restart). The unit tests of the coupling core can be run without any
+case:
 
 ```bash
 cmake -S coupling -B build/coupling

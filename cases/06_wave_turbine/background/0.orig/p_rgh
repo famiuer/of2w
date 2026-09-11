@@ -1,0 +1,30 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2306                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    object      p_rgh;
+}
+
+dimensions      [1 -1 -2 0 0 0 0];
+internalField   uniform 0;
+
+boundaryField
+{
+    inlet      { type fixedFluxPressure; value $internalField; }
+    outlet     { type fixedValue; value $internalField; }  // v4p1: open pressure outlet (thesis Ch7; pairs with U zeroGradient)
+    bottom     { type fixedFluxPressure; value $internalField; }
+    atmosphere { type totalPressure; p0 uniform 0; U U; phi phi; rho rho; psi none; gamma 1; value uniform 0; }
+    sides      { type symmetry; }
+    float      { type fixedFluxPressure; value $internalField; }
+    oversetPatch { patchType overset; type overset; }
+}
+
+// ************************************************************************* //

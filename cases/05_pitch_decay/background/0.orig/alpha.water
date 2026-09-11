@@ -1,0 +1,67 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2306                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    object      alpha.water;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 0 0 0 0 0 0];
+
+internalField   uniform 0;
+
+boundaryField
+{
+    inlet
+    {
+        type            zeroGradient;
+    }
+
+    outlet
+    {
+        type            zeroGradient;
+    }
+
+    sides
+    {
+        type            zeroGradient;
+    }
+
+    bottom
+    {
+        type            symmetry;
+    }
+
+    top
+    {
+        type            inletOutlet;
+        inletValue      $internalField;
+        value           $internalField;
+    }
+
+    float
+    {
+        type            zeroGradient;
+    }
+
+    // type overset: implicit fringe coupling for the alpha matrix.
+    // v7e: fluxCorrection REMOVED — confirmed the catastrophic destabilizer
+    // (v7d body omega 3.26e9 on the clean mesh). Two-phase overset flux
+    // correction is dev-warned as non-robust; the proven set runs without it.
+    oversetPatch
+    {
+        patchType       overset;
+        type            overset;
+    }
+}
+
+
+// ************************************************************************* //

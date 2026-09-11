@@ -1,0 +1,97 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2306                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      dynamicMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+//
+
+dynamicFvMesh       dynamicOversetFvMesh;
+
+motionSolver        rigidBodyMotion;
+
+motionSolverLibs
+(
+    rigidBodyMeshMotion
+    "librigidBodyMooring.so"
+    "libOF2.so"
+);
+
+rigidBodyMotionCoeffs
+{
+    report          on;
+
+    solver
+    {
+        type        Newmark;
+    }
+
+    accelerationRelaxation  0.2;
+    accelerationDamping     1.0;
+
+    bodies
+    {
+        platformBody
+        {
+            type            rigidBody;
+            parent          root;
+
+
+            centreOfMass    (-1.174 0 -13.408);
+            mass            1.3473e7;
+            inertia         (6.827e9 0 0 6.827e9 0 1.226e10);
+
+            transform       (1 0 0 0 1 0 0 0 1) (0 0 0);
+
+            joint           { type Ry; }
+
+            patches         (float);
+
+            // Overset: >> max patch distance inside the component region
+            // (~20 m hull-to-box-corner) -> whole component rigid.
+            innerDistance   100;
+            outerDistance   101;
+        }
+    }
+
+    restraints
+    {
+        mooring
+        {
+            type             moorDynR2;
+            body             platformBody;
+            couplingMode     "BODY";
+            inputFile        "Mooring/lines_oc4.txt";
+            bodies           ( platformBody );
+            writeMooringVTK  false;
+            vtkPrefix        "oc4_overset_pitch";   // unused while VTK off
+            vtkStartTime     0;
+            outerCorrector   3;
+        }
+
+        aero
+        {
+            type             OpenFast;
+            body             platformBody;
+            fstFile          "openfast/derisk.fst";
+            towerBasePoint   (0.872 0 9.962);
+
+            initialPitch     5;
+            initialSurge     0;
+            initialSway      0;
+            initialHeave     0;
+            verbose          true;
+        }
+    }
+}
+
+// ************************************************************************* //
