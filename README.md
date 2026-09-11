@@ -16,7 +16,7 @@ strong per-corrector coupling.
 | `solvers/overWaveDyMFoam/` | overset VOF 6-DOF solver with waves2Foam relaxation zones |
 | `cases/` | test battery, from a minimal coupled run to a waves+turbine showcase |
 | `external/` | pinned submodules: OpenFAST, waves2Foam, MoorDyn, foamMooring, stabRAS |
-| `tools/`, `docs/` | comparison scripts, architecture and interface notes |
+| `docs/` | architecture and interface notes |
 
 ## Quick start
 

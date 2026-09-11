@@ -16,7 +16,7 @@ You need on the run node:
 - gcc/gfortran ≥ 8 (for OpenFAST)
 - CMake ≥ 3.16
 - BLAS/LAPACK (`openblas` is fine)
-- Python 3 with numpy/scipy/matplotlib for `tools/compare_decay.py`
+- Python 3 with numpy/matplotlib (for the case check scripts)
 
 ```bash
 git clone <repo-url> of2-coupling
@@ -104,11 +104,8 @@ On a SLURM cluster, copy `slurm.example`, edit the env block, and
 
 ## 7. Post-processing
 
-```bash
-python3 tools/compare_decay.py --of2 cases/oc4-decay-v6 --baseline path/to/baseline.outb
-```
-
-This compares against a standalone OpenFAST + HydroDyn baseline. To
+`cases/05_pitch_decay/check.py` overlays the CFD decay on a standalone
+OpenFAST + HydroDyn baseline (shipped precomputed in that case). To
 generate the baseline, set up an OpenFAST-only case with `CompHydro=1`
 and `CompMooring=3` and `PtfmHeave=1` IC; run it locally:
 

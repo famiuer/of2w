@@ -168,7 +168,7 @@ For HPC clusters that load OpenFOAM via `module`, the bashrc has to be
 sourced AFTER the module load — in a non-interactive (slurm batch)
 shell, putting `module load openfoam/v2306; source
 $OPENFOAM_HOME/OpenFOAM/etc/bashrc` in the script is the working
-pattern (see `tools/coupled_restart.slurm.example`).
+pattern (see `cases/06_wave_turbine/slurm.example`).
 
 If your node has more than 10 cores, bump `numberOfSubdomains` in
 `system/decomposeParDict` — the `mesh` script and the run line above
