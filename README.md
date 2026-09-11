@@ -37,9 +37,11 @@ wave-only and wave-current tanks; coupled wave + turbine load cases.
 
 ## License
 
-GPL-3.0-or-later (required by linking against OpenFOAM). See
-[`LICENSE`](LICENSE).
+GPL-3.0-or-later . See [`LICENSE`](LICENSE).
 
-## Citation
+## References
 
-Based on the OF2 method: Wind Energ. Sci. 8, 1597-1616 (2023).
+1. **Campaña-Alonso, G., Martín-San-Román, R., Méndez-López, B., Benito-Cia, P., & Azcona-Armendáriz, J. (2023).** *OF 2 : coupling OpenFAST and OpenFOAM for high-fidelity aero-hydro-servo-elastic FOWT simulations*. _Wind Energy Science_, **8**(10), 1597–1611. [https://doi.org/10.5194/wes-8-1597-2023](https://doi.org/10.5194/wes-8-1597-2023)
+
+2. **Chen, H., & Hall, M. (2022).** *CFD simulation of floating body motion with mooring dynamics: Coupling MoorDyn with OpenFOAM.* *Applied Ocean Research*, 124(June), 103210. [https://doi.org/10.1016/j.apor.2022.103210](https://doi.org/10.1016/j.apor.2022.103210)
+3. **Chen, H., Medina, T. A., & Cercos-Pita, J. L. (2024).** *CFD simulation of multiple moored floating structures using OpenFOAM: An open-access mooring restraints library.* *Ocean Engineering*, 303(March), 117697. [https://doi.org/10.1016/j.oceaneng.2024.117697](https://doi.org/10.1016/j.oceaneng.2024.117697)
