@@ -35,7 +35,7 @@ extern "C" double g_addedMassPitch, g_M0pitch;
 // ----------------------------------------------------------------------------
 // Relative to the process cwd (run_tests.sh runs the binary from this harness
 // dir, where the case/ fixture ships) — portable across machines (was a
-// hardcoded local absolute path, which failed to write on ham8).
+// hardcoded local absolute path).
 static const char* HARNESS_ROOT = ".";
 
 // OC4 geometry constants shared by code and expected-value computation.

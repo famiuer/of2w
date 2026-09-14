@@ -24,10 +24,7 @@ Local:
     source /usr/lib/openfoam/openfoam2306/etc/bashrc
     source <waves2Foam>/bin/bashrc
     cd <waves2Foam>/applications/solvers/solvers2306_PLUS/waveDyMFoam && wmake
-ham8: same recipe with `scripts/env.sh` + the waves2Foam `bin/bashrc` sourced
-(binary lands in `$FOAM_USER_APPBIN`, on the slurm PATH). Deployed 2026-07-11.
-
-## Verification (2026-07-11)
+## Verification
 
 1. **Dynamic path**: validated 2D wave tank (`lc3p1wave2d_v6`) with an ACTIVE
    `velocityLaplacian` motion solver (zero boundary motion): 0.6 s, motion
@@ -36,10 +33,9 @@ ham8: same recipe with `scripts/env.sh` + the waves2Foam `bin/bashrc` sourced
    waves2Foam zones (StokesII H=0.12 m, T=2 s): sixDoF morphing +
    moorDynR2 (MoorDyn v2.6.1, BODY mode) + relaxation, 2 s / 1511 steps clean,
    physically sensible moored-box drift.
-3. **Coupled OC4 morphing pilot** (`oc4_of2_wh6t10_dm`, ham8): 6.8M-cell
-   body-fitted mesh, rigidBodyMeshMotion (inner 10 / outer 30) + OF2 +
-   MoorDyn; platform tracks the OpenFAST baseline orbit through the first
-   wave periods.
+3. **Coupled OC4 morphing pilot**: 6.8M-cell body-fitted mesh,
+   rigidBodyMeshMotion (inner 10 / outer 30) + OF2W + MoorDyn; the platform
+   tracks the OpenFAST baseline orbit through the first wave periods.
 
 ## Case-setup requirements (cost time; learned the hard way)
 
