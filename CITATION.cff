@@ -1,0 +1,63 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "OF2W: OpenFOAM and OpenFAST coupling for floating offshore wind turbines"
+type: software
+authors:
+  - family-names: Chen
+    given-names: Geng
+    affiliation: "Durham University"
+version: 0.1.0
+date-released: 2026-09-14
+repository-code: "https://github.com/famiuer/of2w"
+license: GPL-3.0-or-later
+keywords:
+  - floating offshore wind turbine
+  - OpenFOAM
+  - OpenFAST
+  - fluid-structure interaction
+  - mooring dynamics
+  - CFD
+references:
+  - type: article
+    title: "OF2: coupling OpenFAST and OpenFOAM for high-fidelity aero-hydro-servo-elastic FOWT simulations"
+    authors:
+      - family-names: "Campaña-Alonso"
+        given-names: "Guillén"
+      - family-names: "Martín-San-Román"
+        given-names: Raquel
+      - family-names: "Méndez-López"
+        given-names: Beatriz
+      - family-names: "Benito-Cia"
+        given-names: Pablo
+      - family-names: "Azcona-Armendáriz"
+        given-names: "José"
+    journal: "Wind Energy Science"
+    volume: 8
+    year: 2023
+    start: 1597
+    end: 1611
+    doi: 10.5194/wes-8-1597-2023
+  - type: article
+    title: "CFD simulation of floating body motion with mooring dynamics: Coupling MoorDyn with OpenFOAM"
+    authors:
+      - family-names: Chen
+        given-names: Haifei
+      - family-names: Hall
+        given-names: Matthew
+    journal: "Applied Ocean Research"
+    volume: 124
+    year: 2022
+    doi: 10.1016/j.apor.2022.103210
+  - type: article
+    title: "CFD simulation of multiple moored floating structures using OpenFOAM: An open-access mooring restraints library"
+    authors:
+      - family-names: Chen
+        given-names: Haifei
+      - family-names: Medina
+        given-names: "Tomás Agustín"
+      - family-names: "Cercos-Pita"
+        given-names: "Jose Luis"
+    journal: "Ocean Engineering"
+    volume: 303
+    year: 2024
+    doi: 10.1016/j.oceaneng.2024.117697
