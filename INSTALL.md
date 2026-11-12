@@ -61,11 +61,13 @@ which wmake interFoam blockMesh                     # should resolve
 git submodule update --init --recursive
 ```
 
-This populates `external/openfast/`, `external/moordyn/`,
-`external/foamMooring/` at the pinned commits the coupling was tested
-against:
+This populates the five fork submodules at the pinned commits the
+coupling was tested against. Every fork also carries the immutable tag
+**`of2w-v0.1.1`** pointing at exactly these commits, so the full
+five-fork state of this release can always be reproduced even if the
+branches move:
 
-| Submodule     | Upstream                                              | Pinned commit |
+| Submodule     | Upstream                                              | Pinned commit (= tag `of2w-v0.1.1`) |
 |---------------|-------------------------------------------------------|---------------|
 | openfast      | `https://github.com/famiuer/openfast.git` (fork)      | `f54fe019` (branch `of2-coupling-v0.1`) |
 | moordyn       | `https://github.com/famiuer/MoorDyn.git` (fork)  | `405dd8cc`    |
