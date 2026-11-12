@@ -16,7 +16,7 @@ cd "$(dirname "$0")"
 ROOT=$PWD
 LOGS=$ROOT/build/logs
 mkdir -p "$LOGS"
-STEPS=(openfast moordyn foammooring stabras coupling of2 waves2foam)
+STEPS=(openfast moordyn discon foammooring stabras coupling of2 waves2foam)
 SKIP=()
 
 while [ $# -gt 0 ]; do case "$1" in
@@ -69,6 +69,11 @@ step_moordyn() {
     cmake --build build/moordyn -j"$(nproc)"
     cmake --install build/moordyn --prefix "$ROOT/build/moordyn/install"
 }
+step_discon() {
+    # ServoDyn's Bladed-interface controller: built from the shipped NREL
+    # source (binaries are not distributed; .gitignore excludes *.so)
+    ./scripts/build_discon.sh
+}
 step_foammooring() {
     export MOORDYN_INSTALL_DIR=$ROOT/build/moordyn/install
     cd external/foamMooring && ./Allwmake
@@ -117,6 +122,7 @@ echo "OF2W bootstrap — logs in build/logs/"
     echo "ERROR: submodules not populated — run: git submodule update --init --recursive"; exit 1; }
 run_step openfast   step_openfast
 run_step moordyn    step_moordyn
+run_step discon     step_discon
 need_openfoam
 run_step foammooring step_foammooring
 run_step stabras     step_stabras

@@ -254,6 +254,7 @@ will pick up the new value automatically.
 | `FAST_Sizes failed (ErrStat=4)` at solver startup | Missing or corrupt `openfast/derisk.fst` | Verify the file exists and parses; common header bug: header must be exactly 2 lines before `Echo` |
 | `mpirun: not enough slots` | `numberOfSubdomains` > physical cores | Reduce in `system/decomposeParDict` AND re-run `./mesh` |
 | ctest says "No tests were found" | called from wrong cwd | `cd build/coupling && ctest --output-on-failure` |
+| ServoDyn aborts loading `DISCON_OC3Hywind.so` (cases 01/06) | Controller DLL not built (binaries are not distributed) | `./scripts/build_discon.sh` (bootstrap.sh runs it; needs only gfortran) |
 | waves2Foam Allwmake: "The directory path ... does not exist. Correct the path in bin/bashrc" | `WAVES_DIR` still at the upstream default | Set `WAVES_DIR` to the absolute path of `external/waves2Foam` (§7; `bootstrap.sh` does this) |
 | waves2Foam build: `gsl/gsl_*.h: No such file` or `-lgsl not found` | GSL paths in `bin/bashrc` wrong for your system | Set `WAVES_GSL_INCLUDE`/`WAVES_GSL_LIB` from `module show gsl` or `pkg-config gsl --cflags --libs` |
 | `ERROR: waves2Foam not in PATH` from a wave case's `run.sh` | waves2Foam bashrc not sourced in this shell | `source env.sh` (or build first, §7) |

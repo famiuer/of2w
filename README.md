@@ -22,7 +22,9 @@ strong per-corrector coupling.
 
 ```bash
 git clone --recurse-submodules https://github.com/famiuer/of2w.git
-cd of2w                  # build against OpenFOAM v2306: see INSTALL.md
+cd of2w
+./bootstrap.sh           # builds the whole stack (prereqs: INSTALL.md)
+source env.sh            # env vars + readiness report, every shell
 cd cases/01_minimal_coupling && ./run.sh   # minutes-scale coupled + restart check
 ```
 

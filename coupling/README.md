@@ -1,103 +1,49 @@
-# OC4 Coupling Core
+# OF2W coupling core
 
-This subtree contains the solver-agnostic coupling code that will sit between:
+The solver-agnostic layer between OpenFOAM, OpenFAST and MoorDyn-C.
+Design rules: OpenFOAM-specific code stays thin; OpenFAST and MoorDyn
+sit behind adapter APIs; core math and load transfer are unit-testable
+without a cluster, an OpenFOAM install, or the real external libraries.
 
-- OpenFOAM
-- MoorDyn-C
-- OpenFAST
+## How the production path works
 
-The design intent is:
+OpenFOAM owns the platform: the two-phase hull hydrodynamics, the wave
+field, the 6-DOF motion and (through foamMooring/MoorDyn) the mooring.
+Each outer corrector of each CFD step, the `of2Restraint` plugin:
 
-- keep OpenFOAM-specific code thin
-- keep MoorDyn and OpenFAST integration behind wrapper APIs
-- make core math and load-transfer logic testable without a cluster or OpenFOAM install
+1. extracts the rigid-body state and converts it to the shared
+   `PlatformState` (frames per `docs/coordinate_conventions.md`);
+2. imposes it on OpenFAST's ElastoDyn through the OF2 C-ABI bridge
+   (`OF2_SetImposedPlatformState` / PMI injection — custom symbols
+   carried by the pinned `famiuer/openfast` fork, not stock
+   actuator-node exchange);
+3. receives one resultant tower-base reaction wrench
+   (`OF2_GetTowerBaseReaction`: tower + RNA inertia, gravity, rotor
+   aerodynamics) and returns it to the rigid-body solver, with Aitken
+   dynamic under-relaxation for strong per-corrector coupling.
+
+Coupled OpenFAST decks therefore run `CompHydro=0`, `CompMooring=0`
+(the CFD owns both) and `ModCoupling=1`.
 
 ## Layout
 
-- `common/`: shared state types, frame transforms, load shifting, formatting
-- `moordyn/`: MoorDyn wrapper interfaces and concrete C-API adapter
-- `openfast/`: OpenFAST wrapper interfaces and future implementation
-- `restraints/`: load-provider and future OpenFOAM-facing restraint layers
-- `config/examples/`: example coupling configuration files
+- `common/`: shared state types, frame transforms, load shifting
+- `moordyn/`: MoorDyn adapter (C API, runtime-loadable — one resultant
+  global-frame wrench at the platform reference point)
+- `openfast/`: OpenFAST adapter + the OF2 bridge client
+- `restraints/`: load providers and the OpenFOAM-facing restraints
+  (`restraints/openfoam/of2/` builds `libOF2.so`; see INSTALL.md §6)
+- `config/examples/`: example coupling dictionary snippets
 
-The OpenFAST subtree now also includes a buildable shared-library scaffold:
-
-- `forcedopenfast_runtime` -> `libforcedopenfast.so`
-
-This now covers two roles:
-
-- a `stub` backend for local and CI-style coupling tests
-- an `openfast_library` backend path aligned with the OF2/WES architecture
-
-The important design decision is that the production path is **not** based on
-stock actuator-node `openfast-cpp` exchange. It targets a custom
-OpenFAST-library wrapper that takes imposed platform motion and returns one
-platform/interface wrench.
-
-That wrapper path is now scaffolded through the runtime:
-
-- stock `FAST_ExtLoads_Init` and `FAST_CFD_*` lifecycle calls
-- custom OF2-style bridge symbols for platform motion and returned wrench
-- local fake-library coverage for end-to-end tests
-- a cluster-target OpenFAST bridge scaffold under
-  [openfast/bridge](coupling/openfast/bridge#L1) that
-  is designed to patch into `FAST_Library.f90`
-
-## Build
+## Build & test
 
 ```bash
-cmake -S coupling -B build/coupling
-cmake --build build/coupling
-ctest --test-dir build/coupling --output-on-failure
+cmake -S coupling -B build/coupling -DOPENFAST_BUILD_DIR=$PWD/build/openfast
+cmake --build build/coupling -j
+cd build/coupling && ctest --output-on-failure   # 9 tests; run from inside
 ```
 
-The current code is intentionally lightweight and should build with a standard Linux cluster toolchain.
-
-## Current MoorDyn scope
-
-The first concrete adapter targets the version-1 OC4 coupling path described in the WES reference workflow:
-
-- one coupled 6-DOF platform body
-- OpenFOAM-owned platform motion
-- MoorDyn returning one resultant global-frame wrench at the platform reference point
-- optional external wave-kinematics callback for future OpenFOAM-to-MoorDyn wave transfer
-
-The adapter is runtime-loadable, so the coupling code can be compiled and unit-tested even when the MoorDyn shared library is not installed locally.
-
-## Current restraint-side scope
-
-The first restraint-side implementation is a `MoorDynLoadProvider` layer:
-
-- initializes and owns the `MoorDynAdapter`
-- evaluates mooring loads from a `PlatformState`
-- shifts the returned wrench onto the active platform reference point
-- optionally writes a CSV debug trace for time-step-by-time-step load auditing
-
-This is intentionally one step below a real OpenFOAM restraint so we can test the load path locally before binding it to `sixDoFRigidBodyMotion`.
-
-The same pattern is now started for OpenFAST:
-
-- `OpenFASTAdapter` remains the only component allowed to talk to the turbine-side runtime
-- `OpenFASTLoadProvider` turns adapter results into one OpenFOAM-ready interface wrench
-- the intended returned load is a **single resultant reaction force/moment at a defined interface point**, not raw distributed AeroDyn loads
-
-## OpenFOAM shim
-
-The actual OpenFOAM-facing restraint scaffold is now in:
-
-- [coupling/restraints/openfoam/moorDynRestraint.H](coupling/restraints/openfoam/moorDynRestraint.H#L1)
-- [coupling/restraints/openfoam/moorDynRestraint.C](coupling/restraints/openfoam/moorDynRestraint.C#L1)
-- [coupling/restraints/openfoam/Make/files](coupling/restraints/openfoam/Make/files#L1)
-- [coupling/restraints/openfoam/Make/options](coupling/restraints/openfoam/Make/options#L1)
-
-The OpenFOAM shim is intentionally thin:
-
-- it reads restraint-level dictionary settings
-- it extracts the current `sixDoFRigidBodyMotion` state
-- it converts that state into the shared `PlatformState`
-- it delegates load evaluation to the tested bridge/provider/adapter stack
-- it returns one global-frame wrench to the rigid-body solver
-
-An example dictionary snippet is included in:
-
-- [coupling/config/examples/dynamicMeshDict.moorDynRestraint](coupling/config/examples/dynamicMeshDict.moorDynRestraint#L1)
+The tests exercise the adapters against in-process fakes (a stub
+OpenFAST backend and a fake MoorDyn), so they pass on a plain Linux
+toolchain with neither library installed — that is what makes them
+usable as a quick build-sanity check everywhere.

@@ -78,6 +78,9 @@ if [ -n "${WM_PROJECT_DIR:-}" ]; then
     command -v overWaveDyMFoam >/dev/null 2>&1 && _of2w_ok "overWaveDyMFoam" \
         || _of2w_warn "overWaveDyMFoam not on PATH (case 06; build waves2Foam)"
 fi
+[ -f "$OF2W_ROOT/cases/01_minimal_coupling/background/5MW_Baseline/ServoData/DISCON_OC3Hywind.so" ] \
+    && _of2w_ok "DISCON controller DLL" \
+    || _of2w_warn "DISCON_OC3Hywind.so not built — cases 01/06 need it: ./scripts/build_discon.sh"
 [ -x "$OPENFAST_BUILD_DIR/glue-codes/openfast/openfast" ] \
     && _of2w_ok "openfast driver" \
     || _of2w_warn "openfast driver not built (baseline regeneration only)"
