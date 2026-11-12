@@ -3,7 +3,7 @@
 # prints a summary. Usage: ./run_all.sh [01 02 ...]  (default: all)
 cd "$(dirname "$0")"
 sel=("$@")
-[ ${#sel[@]} -eq 0 ] && sel=(01 02 03 04 05 06)
+[ ${#sel[@]} -eq 0 ] && sel=(00 01 02 03 04 05 06)
 declare -A verdict
 for s in "${sel[@]}"; do
     d=$(ls -d ${s}_*/ 2>/dev/null | head -1)

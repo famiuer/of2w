@@ -1,0 +1,29 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2306                                 |
+|   \\  /    A nd           | www.openfoam.com                                |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvOptions;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// CI-smoke only (not in case 01): the deliberately coarse overset mesh can
+// fire spurious velocity spikes at the fringe; physical velocities in this
+// case are O(cm/s), so a 10 m/s cap clips only numerical artefacts. Both
+// restart legs see the identical limiter, so the overlay check is unaffected.
+limitU
+{
+    type            limitVelocity;
+    active          yes;
+    selectionMode   all;
+    max             10;
+}
+
+// ************************************************************************* //

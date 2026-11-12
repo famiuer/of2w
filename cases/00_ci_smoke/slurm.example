@@ -1,0 +1,16 @@
+#!/bin/bash
+# slurm.example — batch template for 01_minimal_coupling (minutes-scale smoke test + restart).
+# Adapt the SBATCH lines + module line to YOUR cluster, then: sbatch slurm.example
+#SBATCH -J of2w_01_minimal_coupling
+#SBATCH -N 1
+#SBATCH -n 10
+#SBATCH --mem=16G
+#SBATCH -t 01:00:00
+#SBATCH -o slurm-%x-%j.out
+
+# module load openfoam/v2306        # uncomment/adapt on module-based clusters
+source "$SLURM_SUBMIT_DIR/../../env.sh"   # OpenFOAM + OF2W vars + waves2Foam
+
+set -o pipefail
+cd "$SLURM_SUBMIT_DIR"
+NP=${SLURM_NTASKS:-10} ./run.sh

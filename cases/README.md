@@ -6,7 +6,8 @@ completing). Prerequisite: OpenFOAM v2306 env sourced + OF2W built.
 
 | Case | Verifies | Scale |
 |---|---|---|
-| `01_minimal_coupling` | coupled stack + restart | minutes, 10 cores |
+| `00_ci_smoke` | coupled stack + restart mechanics (CI-sized) | ~8 min, 4 cores |
+| `01_minimal_coupling` | coupled stack + bit-faithful restart | minutes, 10 cores |
 | `02_wave2d` | 2D regular wave | hours, 8 cores |
 | `03_wave3d` | 3D regular wave | ~1 day, 48 cores |
 | `04_wavecurrent2d` | wave + current, Doppler | hours, 16 cores |

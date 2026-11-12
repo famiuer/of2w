@@ -1,0 +1,63 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2306                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    object      zoneID;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Overset zone marker: 0 = background, 1 = component. Values assigned by
+// setFields from the c0/c1 cellSets (topoSet, after mergeMeshes).
+
+dimensions      [0 0 0 0 0 0 0];
+
+internalField   uniform 0;
+
+boundaryField
+{
+    inlet
+    {
+        type            zeroGradient;
+    }
+
+    outlet
+    {
+        type            zeroGradient;
+    }
+
+    sides
+    {
+        type            zeroGradient;
+    }
+
+    bottom
+    {
+        type            symmetry;
+    }
+
+    top
+    {
+        type            zeroGradient;
+    }
+
+    float
+    {
+        type            zeroGradient;
+    }
+
+    oversetPatch
+    {
+        patchType       overset;
+        type            overset;
+    }
+}
+
+// ************************************************************************* //

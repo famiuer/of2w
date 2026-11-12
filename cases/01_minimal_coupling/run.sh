@@ -10,9 +10,12 @@ NP=${NP:-10}
 SPLICE=0.5
 export FOAM_SIGFPE=false
 
-if [ ! -d "$B/background/constant/polyMesh" ]; then
+# re-mesh when absent OR decomposed for a different rank count (a stale
+# decomposition makes mpirun fail with a cryptic processor-dir error)
+NPROC=$(ls -d "$B"/background/processor* 2>/dev/null | wc -l)
+if [ ! -d "$B/background/constant/polyMesh" ] || [ "$NPROC" -ne "$NP" ]; then
     echo "== mesh (NP=$NP)"
-    ( cd "$B" && NP=$NP ./mesh > log.mesh 2>&1 )
+    ( cd "$B" && NP=$NP ./mesh > log.mesh 2>&1 ) || { echo "MESH FAILED — see log.mesh"; exit 1; }
 fi
 
 for leg in runA runB; do
