@@ -8,6 +8,11 @@ authors:
     affiliation: "Durham University"
 version: 0.1.0
 date-released: 2026-09-14
+doi: 10.5281/zenodo.22744317
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.22744317
+    description: "Zenodo archive of OF2W"
 repository-code: "https://github.com/famiuer/of2w"
 license: GPL-3.0-or-later
 keywords:

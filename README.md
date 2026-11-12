@@ -1,5 +1,7 @@
 # OF2W
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22744317.svg)](https://doi.org/10.5281/zenodo.22744317)
+
 OpenFOAM and OpenFAST coupling for floating offshore wind turbines.
 OpenFOAM is the master: it resolves the two-phase hull hydrodynamics,
 the wave field and the platform 6-DOF motion together with the mooring
