@@ -10,12 +10,11 @@
 #SBATCH -o slurm-%x-%j.out
 
 # ---- environment: OpenFOAM v2306 + waves2Foam + the OF2W libraries -------
-# On module-based clusters load the module FIRST, source its bashrc AFTER
-# (non-interactive shells skip it otherwise), then expose the OF2W builds:
-#   module load openfoam/v2306
-#   source "$OPENFOAM_ETC/bashrc"
-#   export LD_LIBRARY_PATH=$HOME/of2w/install/lib:$LD_LIBRARY_PATH
-source /path/to/your/openfoam-2306/etc/bashrc
+# On module-based clusters load the module FIRST; env.sh then finds the
+# bashrc, sets the OF2W vars and sources waves2Foam (and reports anything
+# missing):
+# module load openfoam/v2306        # uncomment/adapt on module-based clusters
+source "$SLURM_SUBMIT_DIR/../../env.sh"
 
 set -o pipefail
 cd "$SLURM_SUBMIT_DIR"

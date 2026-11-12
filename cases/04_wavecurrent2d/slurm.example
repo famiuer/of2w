@@ -1,0 +1,16 @@
+#!/bin/bash
+# slurm.example — batch template for 04_wavecurrent2d (2D wave + current).
+# Adapt the SBATCH lines + module line to YOUR cluster, then: sbatch slurm.example
+#SBATCH -J of2w_04_wavecurrent2d
+#SBATCH -N 1
+#SBATCH -n 16
+#SBATCH --mem=32G
+#SBATCH -t 08:00:00
+#SBATCH -o slurm-%x-%j.out
+
+# module load openfoam/v2306        # uncomment/adapt on module-based clusters
+source "$SLURM_SUBMIT_DIR/../../env.sh"   # OpenFOAM + OF2W vars + waves2Foam
+
+set -o pipefail
+cd "$SLURM_SUBMIT_DIR"
+NP=${SLURM_NTASKS:-16} ./run.sh

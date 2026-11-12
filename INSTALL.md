@@ -1,5 +1,22 @@
 # Installation
 
+## Fast path
+
+With the prerequisites below in place, one command builds the whole stack
+(OpenFAST → MoorDyn → foamMooring → stabRAS → coupling+tests → libOF2 →
+waves2Foam incl. wave solvers), with per-step logs and resume-on-failure:
+
+```bash
+git clone --recurse-submodules https://github.com/famiuer/of2w.git && cd of2w
+./bootstrap.sh          # re-run after fixing any failure; finished steps skip
+source env.sh           # every build/run shell; prints a readiness report
+cd cases/01_minimal_coupling && ./run.sh
+```
+
+Sections 1–7 below are the same chain done manually, for when you need
+control (exotic clusters, custom OpenFAST) or when a bootstrap step fails
+and you want to understand it.
+
 ## Prerequisites
 
 - **OpenFOAM v2306** (ESI/OpenCFD). Other v2*** releases probably work; only
@@ -54,6 +71,7 @@ against:
 | moordyn       | `https://github.com/famiuer/MoorDyn.git` (fork)  | `405dd8cc`    |
 | foamMooring   | `https://github.com/famiuer/foamMooring.git` (fork)   | `d2f70c3` (branch `of2-restart`) |
 | stabRAS       | `https://github.com/famiuer/stabRAS_v1712.git` (fork) | `f066370` (branch `of2306-port`) |
+| waves2Foam    | `https://github.com/famiuer/waves2Foam.git` (fork)    | `6ba11d64` (branch `of2-coupling-v0.1`) |
 
 You can bump these later by `cd external/<name> && git checkout <newer>`,
 then committing the submodule pointer.
@@ -149,12 +167,54 @@ The two env vars are **required** — they're consumed by the plugin's
 `Make/options`, which has no defaults (intentionally — to fail fast
 rather than silently build against the wrong OpenFAST).
 
-## 7 · Run the reference case
+## 7 · Build waves2Foam + the wave solvers (cases 02/03/04/06)
+
+The wave cases use [waves2Foam](https://github.com/ogoe/waves2Foam)
+relaxation-zone wave generation, vendored as the fork submodule
+`external/waves2Foam` (the fork adds the v2306 solver tree and the
+`overWaveDyMFoam` overset wave solver — see
+`solvers/overWaveDyMFoam/README.md` for the exact diff). Case 01 and 05
+do **not** need this section.
+
+Extra prerequisite: **GSL** (headers + library). `apt install libgsl-dev`,
+or on HPC `module load gsl` (then find its paths with `module show gsl`
+or `pkg-config gsl --cflags --libs`).
+
+```bash
+cd external/waves2Foam
+cp bin/bashrc.org bin/bashrc && chmod a+x bin/bashrc
+# EDIT bin/bashrc — two lines:
+#   export WAVES_DIR=<absolute path to>/of2w/external/waves2Foam   (NOT the
+#       upstream default under $WM_PROJECT_USER_DIR, or Allwmake aborts with
+#       "Correct the path in bin/bashrc")
+#   export WAVES_GSL_INCLUDE / WAVES_GSL_LIB — your GSL paths
+#       (defaults /usr/include and /usr/lib64 are wrong on most clusters)
+./Allwmake        # builds vendored ThirdParty (lapack, fenton4Foam),
+                  # libwaves2Foam, utilities, and ALL v2306 solvers —
+                  # including waveFoam (cases 02-04) and overWaveDyMFoam
+                  # (case 06). ~30-45 min first time.
+cd ../..
+```
+
+`bootstrap.sh` automates the `bin/bashrc` creation (WAVES_DIR set to the
+submodule, GSL located via `pkg-config`). After building, every shell
+that runs a wave case must source `external/waves2Foam/bin/bashrc` —
+`source env.sh` does this for you.
+
+> `solvers/waveDyMFoam/` (a morphing-mesh wave solver) is provenance
+> documentation for non-shipped studies; none of the six cases need it.
+
+## 8 · Run the reference case
 
 The test cases live in `cases/` (see `cases/README.md`; start with
 `cases/01_minimal_coupling`, a minutes-scale full-coupling check with
-restart). The unit tests of the coupling core can be run without any
-case:
+restart). In every run shell:
+
+```bash
+source env.sh      # OpenFOAM + OF2W env vars + waves2Foam + readiness report
+```
+
+The unit tests of the coupling core can be run without any case:
 
 ```bash
 cmake -S coupling -B build/coupling
@@ -165,10 +225,18 @@ cd build/coupling && ctest --output-on-failure    # 9 tests
 ## HPC notes
 
 For HPC clusters that load OpenFOAM via `module`, the bashrc has to be
-sourced AFTER the module load — in a non-interactive (slurm batch)
-shell, putting `module load openfoam/v2306; source
-$OPENFOAM_HOME/OpenFOAM/etc/bashrc` in the script is the working
-pattern (see `cases/06_wave_turbine/slurm.example`).
+sourced AFTER the module load. The working slurm pattern (used by every
+`cases/*/slurm.example`) is:
+
+```bash
+module load openfoam/v2306        # your cluster's module name
+source /path/to/of2w/env.sh       # finds the bashrc, sets all OF2W vars,
+                                  # sources waves2Foam, prints what's missing
+```
+
+If `env.sh` can't auto-detect your OpenFOAM bashrc, point it there once:
+`export OF2W_OPENFOAM_BASHRC=/path/to/etc/bashrc` (or pass the path as
+the first argument to `source env.sh`).
 
 If your node has more than 10 cores, bump `numberOfSubdomains` in
 `system/decomposeParDict` — the `mesh` script and the run line above
@@ -186,3 +254,7 @@ will pick up the new value automatically.
 | `FAST_Sizes failed (ErrStat=4)` at solver startup | Missing or corrupt `openfast/derisk.fst` | Verify the file exists and parses; common header bug: header must be exactly 2 lines before `Echo` |
 | `mpirun: not enough slots` | `numberOfSubdomains` > physical cores | Reduce in `system/decomposeParDict` AND re-run `./mesh` |
 | ctest says "No tests were found" | called from wrong cwd | `cd build/coupling && ctest --output-on-failure` |
+| waves2Foam Allwmake: "The directory path ... does not exist. Correct the path in bin/bashrc" | `WAVES_DIR` still at the upstream default | Set `WAVES_DIR` to the absolute path of `external/waves2Foam` (§7; `bootstrap.sh` does this) |
+| waves2Foam build: `gsl/gsl_*.h: No such file` or `-lgsl not found` | GSL paths in `bin/bashrc` wrong for your system | Set `WAVES_GSL_INCLUDE`/`WAVES_GSL_LIB` from `module show gsl` or `pkg-config gsl --cflags --libs` |
+| `ERROR: waves2Foam not in PATH` from a wave case's `run.sh` | waves2Foam bashrc not sourced in this shell | `source env.sh` (or build first, §7) |
+| Wave case crashes with FPE in the wave BCs | ESI `libwaveModels.so` loaded alongside waves2Foam (BC name clash) | Remove `libwaveModels.so` from `controlDict` `libs` — waves2Foam zones do generation/absorption |

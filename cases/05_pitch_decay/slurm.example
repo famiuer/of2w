@@ -1,0 +1,16 @@
+#!/bin/bash
+# slurm.example — batch template for 05_pitch_decay (overset pitch decay vs OpenFAST, ~1 day).
+# Adapt the SBATCH lines + module line to YOUR cluster, then: sbatch slurm.example
+#SBATCH -J of2w_05_pitch_decay
+#SBATCH -N 1
+#SBATCH -n 10
+#SBATCH --mem=32G
+#SBATCH -t 36:00:00
+#SBATCH -o slurm-%x-%j.out
+
+# module load openfoam/v2306        # uncomment/adapt on module-based clusters
+source "$SLURM_SUBMIT_DIR/../../env.sh"   # OpenFOAM + OF2W vars + waves2Foam
+
+set -o pipefail
+cd "$SLURM_SUBMIT_DIR"
+NP=${SLURM_NTASKS:-10} ./run.sh

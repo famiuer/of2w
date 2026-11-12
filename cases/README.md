@@ -20,5 +20,8 @@ cd 01_minimal_coupling && ./run.sh     # one case  (NP=<n> to override)
 ```
 
 Each case prints `PASS — ...` (exit 0) or `FAIL — ...` (exit 1); see the
-case README for the expected numbers. On a cluster wrap either form in
-your own batch script (template: `06_wave_turbine/slurm.example`).
+case README for the expected numbers. On a cluster every case ships a
+`slurm.example` with sensible core/memory/time defaults — adapt the
+SBATCH + module lines to your cluster and `sbatch` it. All templates
+source the repo's `env.sh`, which sets up OpenFOAM, the OF2W variables
+and waves2Foam in one line.
