@@ -20,10 +20,12 @@ compiled under an explicit name** so morphing cases state their intent in
 
 ## Build
 
-Local:
-    source /usr/lib/openfoam/openfoam2306/etc/bashrc
-    source <waves2Foam>/bin/bashrc
-    cd <waves2Foam>/applications/solvers/solvers2306_PLUS/waveDyMFoam && wmake
+Built automatically by the waves2Foam `Allwmake` (INSTALL.md §7 /
+`bootstrap.sh`) — the solver lives in the fork's `solvers2306_PLUS`
+tree. To rebuild just this solver:
+
+    source env.sh      # repo root: OpenFOAM + waves2Foam env
+    cd external/waves2Foam/applications/solvers/solvers2306_PLUS/waveDyMFoam && wmake
 ## Verification
 
 1. **Dynamic path**: validated 2D wave tank (`lc3p1wave2d_v6`) with an ACTIVE

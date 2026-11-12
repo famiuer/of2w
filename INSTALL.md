@@ -71,7 +71,7 @@ against:
 | moordyn       | `https://github.com/famiuer/MoorDyn.git` (fork)  | `405dd8cc`    |
 | foamMooring   | `https://github.com/famiuer/foamMooring.git` (fork)   | `d2f70c3` (branch `of2-restart`) |
 | stabRAS       | `https://github.com/famiuer/stabRAS_v1712.git` (fork) | `f066370` (branch `of2306-port`) |
-| waves2Foam    | `https://github.com/famiuer/waves2Foam.git` (fork)    | `6ba11d64` (branch `of2-coupling-v0.1`) |
+| waves2Foam    | `https://github.com/famiuer/waves2Foam.git` (fork)    | `7c1a9d1` (branch `of2-coupling-v0.1`) |
 
 You can bump these later by `cd external/<name> && git checkout <newer>`,
 then committing the submodule pointer.
@@ -201,8 +201,10 @@ submodule, GSL located via `pkg-config`). After building, every shell
 that runs a wave case must source `external/waves2Foam/bin/bashrc` —
 `source env.sh` does this for you.
 
-> `solvers/waveDyMFoam/` (a morphing-mesh wave solver) is provenance
-> documentation for non-shipped studies; none of the six cases need it.
+> `Allwmake` also builds `waveDyMFoam`, a morphing-mesh (deforming,
+> body-fitted) wave solver — the single-mesh alternative to the overset
+> `overWaveDyMFoam`. No shipped case uses it; usage notes in
+> `solvers/waveDyMFoam/README.md`.
 
 ## 8 · Run the reference case
 
