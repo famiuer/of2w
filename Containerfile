@@ -38,7 +38,7 @@ RUN ./bootstrap.sh
 # runs as the HOST user with the host $HOME bind-mounted, so anything
 # left in /root/OpenFOAM/... would be invisible at runtime.
 RUN bash -c 'source /usr/lib/openfoam/openfoam2306/etc/bashrc; \
-    cp -v "$FOAM_USER_LIBBIN"/*.so "$FOAM_LIBBIN"/ && \
+    cp -av "$FOAM_USER_LIBBIN"/*.so* "$FOAM_LIBBIN"/ && \
     cp -v "$FOAM_USER_APPBIN"/* "$FOAM_APPBIN"/ 2>/dev/null; \
     rm -rf "$HOME/OpenFOAM"'
 
