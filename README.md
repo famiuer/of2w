@@ -1,5 +1,6 @@
 # OF2W
 
+[![core-ci](https://github.com/famiuer/of2w/actions/workflows/core-ci.yml/badge.svg?branch=main)](https://github.com/famiuer/of2w/actions/workflows/core-ci.yml)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22744317.svg)](https://doi.org/10.5281/zenodo.22744317)
 
 OpenFOAM and OpenFAST coupling for floating offshore wind turbines.
