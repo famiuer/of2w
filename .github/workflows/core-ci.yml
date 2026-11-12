@@ -1,0 +1,44 @@
+# core-ci — the FAST LANE (see of2w engineering plan, Tier 1 / QC rules).
+# Dependency-free by design: the coupling core + its 9 unit tests build on
+# a bare toolchain (no OpenFOAM, no OpenFAST), so this lane can never rot
+# because of an external repository. Target wall time < 5 min.
+name: core-ci
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '0 6 * * 1'   # weekly bitrot alarm
+
+permissions:
+  contents: read
+
+concurrency:
+  group: core-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  core-tests:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4   # no submodules needed: tests use in-process fakes
+      - name: Build coupling core
+        run: |
+          cmake -S coupling -B build/coupling -DCMAKE_BUILD_TYPE=Release
+          cmake --build build/coupling -j"$(nproc)"
+      - name: Unit tests (9, against in-process fakes)
+        run: cd build/coupling && ctest --output-on-failure
+
+  script-sanity:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Shell syntax (bootstrap, env, cases, templates)
+        run: |
+          set -e
+          for f in bootstrap.sh env.sh scripts/*.sh cases/run_all.sh \
+                   cases/*/run.sh cases/*/slurm.example cases/*/mesh; do
+            [ -f "$f" ] && bash -n "$f" && echo "ok: $f"
+          done
+      - name: Truth-guard (QC-3; no build logic outside bootstrap.sh)
+        run: bash scripts/truth_guard.sh
