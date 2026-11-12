@@ -57,7 +57,9 @@ fi
 
 # ---- 4 · doctor: is everything actually built? ---------------------------
 _of2w_lib() {  # $1 lib name, $2 severity(fail|warn), $3 hint
-    if [ -n "${FOAM_USER_LIBBIN:-}" ] && [ -f "$FOAM_USER_LIBBIN/$1" ]; then
+    # user libbin (native builds) or system libbin (container relocates there)
+    if { [ -n "${FOAM_USER_LIBBIN:-}" ] && [ -f "$FOAM_USER_LIBBIN/$1" ]; } \
+       || { [ -n "${FOAM_LIBBIN:-}" ] && [ -f "$FOAM_LIBBIN/$1" ]; }; then
         _of2w_ok "$1"
     elif [ "$2" = fail ]; then _of2w_fail "$1 missing — $3"
     else _of2w_warn "$1 missing — $3"; fi
@@ -66,8 +68,11 @@ if [ -n "${WM_PROJECT_DIR:-}" ]; then
     _of2w_lib libOF2.so              warn "INSTALL.md §6 (needed by all coupled cases)"
     _of2w_lib librigidBodyMooring.so warn "INSTALL.md §4 (needed by all coupled cases)"
     _of2w_lib libstabRASModels.so    warn "INSTALL.md §4b (needed by turbulent cases)"
-    if [ -f "${FOAM_USER_LIBBIN:-/nonexistent}/libOF2.so" ]; then
-        if ldd "$FOAM_USER_LIBBIN/libOF2.so" 2>/dev/null | grep -q 'libopenfastlib.*not found'; then
+    _of2lib=""
+    [ -f "${FOAM_USER_LIBBIN:-/nonexistent}/libOF2.so" ] && _of2lib="$FOAM_USER_LIBBIN/libOF2.so"
+    [ -z "$_of2lib" ] && [ -f "${FOAM_LIBBIN:-/nonexistent}/libOF2.so" ] && _of2lib="$FOAM_LIBBIN/libOF2.so"
+    if [ -n "$_of2lib" ]; then
+        if ldd "$_of2lib" 2>/dev/null | grep -q 'libopenfastlib.*not found'; then
             _of2w_fail "libOF2.so cannot resolve libopenfastlib.so — check OPENFAST_BUILD_DIR"
         else
             _of2w_ok "libOF2.so resolves libopenfastlib.so"
