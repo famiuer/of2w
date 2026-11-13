@@ -39,6 +39,21 @@ else
     _of2w_fail "OpenFOAM env not loaded — source env.sh with the bashrc path (see INSTALL.md 'Locating OpenFOAM's bashrc')"
 fi
 
+# Inside the OF2W container image the stack lives in the system dirs.
+# Apptainer mounts the host $HOME, and OpenFOAM searches the user's
+# ~/OpenFOAM/<user>-<version> first, so host-built copies of libOF2.so,
+# solvers etc. would silently replace the image's. Drop the user dirs.
+_OF2W_CT=""
+if [ -f "$OF2W_ROOT/.of2w-container" ] && [ -n "${WM_PROJECT_DIR:-}" ]; then
+    _OF2W_CT=1
+    _of2w_strip() {  # $1 variable name, $2 directory to remove from it
+        local v=":${!1}:"; v="${v//:$2:/:}"; v="${v#:}"; v="${v%:}"; export "$1=$v"; }
+    [ -n "${FOAM_USER_LIBBIN:-}" ] && _of2w_strip LD_LIBRARY_PATH "$FOAM_USER_LIBBIN"
+    [ -n "${FOAM_USER_APPBIN:-}" ] && _of2w_strip PATH "$FOAM_USER_APPBIN"
+    unset -f _of2w_strip
+    _of2w_ok "container image: using the built-in stack (~/OpenFOAM user builds ignored)"
+fi
+
 # ---- 2 · OF2W component locations ---------------------------------------
 export OPENFAST_BUILD_DIR="${OPENFAST_BUILD_DIR:-$OF2W_ROOT/build/openfast}"
 export OPENFAST_SRC_DIR="${OPENFAST_SRC_DIR:-$OF2W_ROOT/external/openfast}"
@@ -62,7 +77,7 @@ fi
 # ---- 4 · doctor: is everything actually built? ---------------------------
 _of2w_lib() {  # $1 lib name, $2 severity(fail|warn), $3 hint
     # user libbin (native builds) or system libbin (container relocates there)
-    if { [ -n "${FOAM_USER_LIBBIN:-}" ] && [ -f "$FOAM_USER_LIBBIN/$1" ]; } \
+    if { [ -z "$_OF2W_CT" ] && [ -n "${FOAM_USER_LIBBIN:-}" ] && [ -f "$FOAM_USER_LIBBIN/$1" ]; } \
        || { [ -n "${FOAM_LIBBIN:-}" ] && [ -f "$FOAM_LIBBIN/$1" ]; }; then
         _of2w_ok "$1"
     elif [ "$2" = fail ]; then _of2w_fail "$1 missing — $3"
@@ -73,7 +88,7 @@ if [ -n "${WM_PROJECT_DIR:-}" ]; then
     _of2w_lib librigidBodyMooring.so warn "INSTALL.md §4 (needed by all coupled cases)"
     _of2w_lib libstabRASModels.so    warn "INSTALL.md §4b (needed by turbulent cases)"
     _of2lib=""
-    [ -f "${FOAM_USER_LIBBIN:-/nonexistent}/libOF2.so" ] && _of2lib="$FOAM_USER_LIBBIN/libOF2.so"
+    [ -z "$_OF2W_CT" ] && [ -f "${FOAM_USER_LIBBIN:-/nonexistent}/libOF2.so" ] && _of2lib="$FOAM_USER_LIBBIN/libOF2.so"
     [ -z "$_of2lib" ] && [ -f "${FOAM_LIBBIN:-/nonexistent}/libOF2.so" ] && _of2lib="$FOAM_LIBBIN/libOF2.so"
     if [ -n "$_of2lib" ]; then
         if ldd "$_of2lib" 2>/dev/null | grep -q 'libopenfastlib.*not found'; then

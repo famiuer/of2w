@@ -63,6 +63,9 @@ RUN find /opt/of2w/build /opt/of2w/external -name '*.o' -delete \
               /opt/of2w/external/openfast/.git \
               /opt/of2w/external/*/.git /opt/of2w/.git
 
+# Tells env.sh it is inside the image (it then ignores ~/OpenFOAM user builds)
+RUN touch /opt/of2w/.of2w-container
+
 LABEL org.opencontainers.image.source="https://github.com/famiuer/of2w" \
       org.opencontainers.image.description="OF2W: OpenFOAM-OpenFAST-MoorDyn coupling for FOWT, full stack prebuilt" \
       org.opencontainers.image.licenses="GPL-3.0-or-later"
