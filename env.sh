@@ -22,8 +22,12 @@ _of2w_warn() { printf '  [WARN] %s\n' "$1"; _OF2W_WARN=$((_OF2W_WARN+1)); }
 _of2w_fail() { printf '  [FAIL] %s\n' "$1"; _OF2W_FAIL=$((_OF2W_FAIL+1)); }
 
 # ---- 1 · OpenFOAM --------------------------------------------------------
-if [ -z "${WM_PROJECT_DIR:-}" ]; then
+# Also (re)source when WM_PROJECT_DIR is set but wmake is not on PATH: a
+# half-inherited environment, e.g. Apptainer passing the host's OpenFOAM
+# variables into the container while resetting PATH.
+if [ -z "${WM_PROJECT_DIR:-}" ] || ! command -v wmake >/dev/null 2>&1; then
     for _c in "${1:-}" "${OF2W_OPENFOAM_BASHRC:-}" \
+              "${WM_PROJECT_DIR:+$WM_PROJECT_DIR/etc/bashrc}" \
               /usr/lib/openfoam/openfoam2306/etc/bashrc \
               "$HOME/OpenFOAM/OpenFOAM-v2306/etc/bashrc"; do
         if [ -n "$_c" ] && [ -f "$_c" ]; then . "$_c"; break; fi
