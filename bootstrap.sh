@@ -5,6 +5,8 @@
 #   ./bootstrap.sh --list          # show steps and their status
 #   ./bootstrap.sh --force STEP    # rebuild one step even if done
 #   ./bootstrap.sh --skip STEP     # skip a step this run (repeatable)
+#   ./bootstrap.sh --only STEP     # run just this step (repeatable);
+#                                  #   earlier steps must already be done
 #
 # Steps (in order):  openfast moordyn foammooring stabras coupling of2 waves2foam
 # Each step logs to build/logs/<step>.log and leaves build/logs/<step>.done;
@@ -18,6 +20,7 @@ LOGS=$ROOT/build/logs
 mkdir -p "$LOGS"
 STEPS=(openfast moordyn discon foammooring stabras coupling of2 waves2foam)
 SKIP=()
+ONLY=()
 
 while [ $# -gt 0 ]; do case "$1" in
     --list)  for s in "${STEPS[@]}"; do
@@ -26,8 +29,15 @@ while [ $# -gt 0 ]; do case "$1" in
              done; exit 0 ;;
     --force) rm -f "$LOGS/$2.done"; shift 2 ;;
     --skip)  SKIP+=("$2"); shift 2 ;;
-    *) echo "usage: $0 [--list] [--force STEP] [--skip STEP]"; exit 1 ;;
+    --only)  ONLY+=("$2"); shift 2 ;;
+    *) echo "usage: $0 [--list] [--force STEP] [--skip STEP] [--only STEP]"; exit 1 ;;
 esac; done
+
+want() {  # with --only, run just the named steps; otherwise run all
+    [ ${#ONLY[@]} -eq 0 ] && return 0
+    local x; for x in "${ONLY[@]}"; do [ "$x" = "$1" ] && return 0; done
+    return 1
+}
 
 need_openfoam() {
     [ -n "${WM_PROJECT_DIR:-}" ] && command -v wmake >/dev/null && return 0
@@ -52,7 +62,9 @@ run_step() {  # $1 name, rest: command (run in a subshell, logged)
         touch "$LOGS/$s.done"; echo "   $s OK"
     else
         echo "   $s FAILED — see build/logs/$s.log (last lines:)"
-        tail -5 "$LOGS/$s.log" | sed 's/^/   | /'
+        tail -40 "$LOGS/$s.log" | sed 's/^/   | /'
+        echo "   compile errors in the log, if any:"
+        grep -nE 'error:|Error [0-9]|Stop\.' "$LOGS/$s.log" | tail -15 | sed 's/^/   | /'
         echo "   Fix the cause (INSTALL.md troubleshooting), then re-run ./bootstrap.sh"
         exit 1
     fi
@@ -114,20 +126,28 @@ step_waves2foam() {
     fi
     ./Allwmake   # library + ThirdParty + ALL solvers incl. waveFoam, overWaveDyMFoam
     set +u; . bin/bashrc quiet; set -u
-    [ -x "$WAVES_APPBIN/waveFoam" ] && [ -x "$WAVES_APPBIN/overWaveDyMFoam" ]
+    local missing=0 b
+    for b in waveFoam overWaveDyMFoam; do
+        [ -x "$WAVES_APPBIN/$b" ] || { echo "ERROR: $b did not land in $WAVES_APPBIN"; missing=1; }
+    done
+    [ "$missing" -eq 0 ]
 }
 
 echo "OF2W bootstrap — logs in build/logs/"
 [ -d external/openfast/modules ] || {
     echo "ERROR: submodules not populated — run: git submodule update --init --recursive"; exit 1; }
-run_step openfast   step_openfast
-run_step moordyn    step_moordyn
-run_step discon     step_discon
-need_openfoam
-run_step foammooring step_foammooring
-run_step stabras     step_stabras
-run_step coupling    step_coupling
-run_step of2         step_of2
-run_step waves2foam  step_waves2foam
-echo
-echo "All steps complete. Next:  source env.sh   then   cd cases/01_minimal_coupling && ./run.sh"
+! want openfast    || run_step openfast   step_openfast
+! want moordyn     || run_step moordyn    step_moordyn
+! want discon      || run_step discon     step_discon
+if want foammooring || want stabras || want of2 || want waves2foam; then
+    need_openfoam
+fi
+! want foammooring || run_step foammooring step_foammooring
+! want stabras     || run_step stabras     step_stabras
+! want coupling    || run_step coupling    step_coupling
+! want of2         || run_step of2         step_of2
+! want waves2foam  || run_step waves2foam  step_waves2foam
+if [ ${#ONLY[@]} -eq 0 ]; then
+    echo
+    echo "All steps complete. Next:  source env.sh   then   cd cases/01_minimal_coupling && ./run.sh"
+fi

@@ -26,13 +26,27 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         python3 python3-numpy python3-scipy python3-matplotlib \
     && rm -rf /var/lib/apt/lists/*
 
-# Clone at the pinned ref (tag for releases) with the five fork submodules
-RUN git clone --recurse-submodules --depth 1 --shallow-submodules \
-        --branch "${OF2W_REF}" https://github.com/famiuer/of2w.git /opt/of2w
+# Clone at the pinned ref (tag for releases) with the five fork submodules.
+# OF2W_SHA is informational AND the cache-buster: pass the commit you expect
+# (--build-arg OF2W_SHA=$(git rev-parse HEAD)) so a moved branch re-clones
+# instead of silently reusing a stale cached layer.
+ARG OF2W_SHA=unspecified
+RUN echo "cloning of2w ${OF2W_REF} (expecting ${OF2W_SHA})" \
+    && git clone --recurse-submodules --depth 1 --shallow-submodules \
+        --branch "${OF2W_REF}" https://github.com/famiuer/of2w.git /opt/of2w \
+    && git -C /opt/of2w log --oneline -1
 
-# Build the whole stack with the single source of build truth
+# Build the stack with the single source of build truth, one step per
+# layer: a failure re-runs only its own step, finished steps stay cached.
 WORKDIR /opt/of2w
-RUN ./bootstrap.sh
+RUN ./bootstrap.sh --only openfast
+RUN ./bootstrap.sh --only moordyn
+RUN ./bootstrap.sh --only discon
+RUN ./bootstrap.sh --only foammooring
+RUN ./bootstrap.sh --only stabras
+RUN ./bootstrap.sh --only coupling
+RUN ./bootstrap.sh --only of2
+RUN ./bootstrap.sh --only waves2foam
 
 # Relocate user-dir artifacts to $HOME-independent locations: Apptainer
 # runs as the HOST user with the host $HOME bind-mounted, so anything

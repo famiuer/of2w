@@ -1,0 +1,4 @@
+# The Containerfile COPYs nothing (it clones the repo at a pinned ref),
+# so send no build context at all — without this, docker uploads the
+# multi-GB working tree (external/, build/) on every build.
+*
