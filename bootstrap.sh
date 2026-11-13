@@ -124,9 +124,27 @@ step_waves2foam() {
         fi
         echo "created bin/bashrc (WAVES_DIR + GSL paths); review if GSL is unusual"
     fi
-    ./Allwmake   # library + ThirdParty + ALL solvers incl. waveFoam, overWaveDyMFoam
+    # waves2Foam's bundled legacy Fortran (LAPACK 3.3.1, SPARSKIT2,
+    # OceanWave3D) hard-codes the command `gfortran` and does not compile
+    # with gfortran >= 10 unless argument mismatches are tolerated; older
+    # gfortran does not know the flag. Shim it for this step only.
+    if [ "$(gfortran -dumpversion | cut -d. -f1)" -ge 10 ]; then
+        local real_gfc; real_gfc=$(command -v gfortran)
+        mkdir -p "$ROOT/build/shims"
+        printf '#!/bin/sh\nexec "%s" -fallow-argument-mismatch "$@"\n' "$real_gfc" \
+            > "$ROOT/build/shims/gfortran"
+        chmod +x "$ROOT/build/shims/gfortran"
+        export PATH="$ROOT/build/shims:$PATH"
+        echo "gfortran $(gfortran -dumpversion): building with -fallow-argument-mismatch shim"
+    fi
+    # library + ThirdParty + ALL solvers incl. waveFoam, overWaveDyMFoam
+    ./Allwmake || { echo "ERROR: waves2Foam Allwmake exited non-zero"; return 1; }
     set +u; . bin/bashrc quiet; set -u
+    # upstream Allwmake ignores per-target failures, so test every product
     local missing=0 b
+    for b in libOceanWave3D.so libwaves2Foam.so; do
+        [ -f "$WAVES_LIBBIN/$b" ] || { echo "ERROR: $b did not land in $WAVES_LIBBIN"; missing=1; }
+    done
     for b in waveFoam overWaveDyMFoam; do
         [ -x "$WAVES_APPBIN/$b" ] || { echo "ERROR: $b did not land in $WAVES_APPBIN"; missing=1; }
     done
