@@ -52,6 +52,13 @@ if [ -f "$OF2W_ROOT/.of2w-container" ] && [ -n "${WM_PROJECT_DIR:-}" ]; then
     [ -n "${FOAM_USER_APPBIN:-}" ] && _of2w_strip PATH "$FOAM_USER_APPBIN"
     unset -f _of2w_strip
     _of2w_ok "container image: using the built-in stack (~/OpenFOAM user builds ignored)"
+    # Batch systems often set TMPDIR to a node-local path (e.g. Slurm's
+    # /local/slurm.<jobid>) that is not mounted inside the container; Open
+    # MPI then fails in orte_init ("mkdir ... Read-only file system").
+    if [ -n "${TMPDIR:-}" ] && ! { [ -d "$TMPDIR" ] && [ -w "$TMPDIR" ]; }; then
+        _of2w_ok "TMPDIR=$TMPDIR is not available inside the container — using /tmp"
+        export TMPDIR=/tmp
+    fi
 fi
 
 # ---- 2 · OF2W component locations ---------------------------------------
