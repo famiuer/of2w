@@ -1,0 +1,107 @@
+# container-ci — the SLOW LANE: build the full-stack image, run the smoke
+# case inside it, and publish it only if that passes.
+#
+#   release published : build the release tag, test, push :X.Y.Z and :latest
+#   monthly schedule  : build main and test (bitrot alarm), never pushes
+#   manual dispatch   : build any ref and test; pushes :dev only if asked
+#
+# QC-3: no build logic here. The image is built by the Containerfile, which
+# only calls bootstrap.sh; the test is the case's own run.sh.
+# Release procedure and rules: docs/RELEASING.md.
+name: container-ci
+
+on:
+  release:
+    types: [published]
+  schedule:
+    - cron: '0 5 1 * *'   # 1st of each month
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Branch or tag of of2w to build'
+        default: main
+      publish:
+        description: 'Push the image to GHCR as :dev after the test passes'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: container-ci-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  IMAGE: ghcr.io/famiuer/of2w
+
+jobs:
+  image:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 240
+    steps:
+      - name: Free runner disk space
+        run: |
+          df -h / | tail -1
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc \
+                      /opt/hostedtoolcache/CodeQL
+          sudo docker image prune -af >/dev/null
+          df -h / | tail -1
+
+      - name: Decide what to build and whether to publish
+        id: plan
+        run: |
+          case "${{ github.event_name }}" in
+            release)
+              ref="${{ github.event.release.tag_name }}"
+              tags="${ref#v} latest"; publish=true ;;
+            workflow_dispatch)
+              ref="${{ inputs.ref }}"
+              tags="dev"; publish="${{ inputs.publish }}" ;;
+            *)
+              ref=main; tags=""; publish=false ;;
+          esac
+          sha=$(git ls-remote "https://github.com/${{ github.repository }}.git" \
+                  "$ref" "$ref^{}" | tail -1 | cut -c1-7)
+          [ -n "$sha" ] || { echo "ref '$ref' not found"; exit 1; }
+          {
+            echo "ref=$ref"; echo "sha=$sha"
+            echo "tags=$tags"; echo "publish=$publish"
+          } | tee -a "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.plan.outputs.ref }}
+
+      - name: Build the image
+        run: |
+          docker build -t "$IMAGE:ci" \
+              --build-arg OF2W_REF="${{ steps.plan.outputs.ref }}" \
+              --build-arg OF2W_SHA="${{ steps.plan.outputs.sha }}" \
+              -f Containerfile .
+          docker images "$IMAGE"
+          df -h / | tail -1
+
+      - name: Case 00 inside the image
+        run: |
+          docker run --rm \
+              -e OMPI_ALLOW_RUN_AS_ROOT=1 -e OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1 \
+              "$IMAGE:ci" bash -c \
+              'source /opt/of2w/env.sh && cd /opt/of2w/cases/00_ci_smoke && NP=4 ./run.sh'
+
+      - name: Publish
+        if: steps.plan.outputs.publish == 'true'
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | \
+              docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          for t in ${{ steps.plan.outputs.tags }}; do
+            # version tags are immutable (docs/RELEASING.md, rule 1)
+            if [ "$t" != dev ] && [ "$t" != latest ] && \
+               docker manifest inspect "$IMAGE:$t" >/dev/null 2>&1; then
+              echo "::error::$IMAGE:$t already exists; version tags are never moved"
+              exit 1
+            fi
+            docker tag "$IMAGE:ci" "$IMAGE:$t"
+            docker push "$IMAGE:$t"
+          done
