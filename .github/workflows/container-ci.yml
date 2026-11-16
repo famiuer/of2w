@@ -83,10 +83,13 @@ jobs:
           docker images "$IMAGE"
           df -h / | tail -1
 
+      # The runner has fewer physical cores than the 4 MPI ranks, and Open MPI
+      # counts cores as slots: allow oversubscription (runner-specific).
       - name: Case 00 inside the image
         run: |
           docker run --rm \
               -e OMPI_ALLOW_RUN_AS_ROOT=1 -e OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1 \
+              -e OMPI_MCA_rmaps_base_oversubscribe=1 \
               "$IMAGE:ci" bash -c '
                 source /opt/of2w/env.sh && cd /opt/of2w/cases/00_ci_smoke || exit 1
                 NP=4 ./run.sh && exit 0
