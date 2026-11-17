@@ -1,14 +1,14 @@
 # Releasing OF2W
 
 How a version `vX.Y.Z` is produced, and the rules that keep releases
-reproducible. A release consists of four things that must agree:
+reproducible. A release consists of the following things, which must agree:
 
 | Artefact | Where | Identified by |
 |---|---|---|
 | Source | `github.com/famiuer/of2w` | git tag `vX.Y.Z` |
 | The five forks | `github.com/famiuer/{openfast,MoorDyn,foamMooring,stabRAS,waves2Foam}` | git tag `of2w-vX.Y.Z` on the commit the submodule points at |
 | Container image | `ghcr.io/famiuer/of2w` | image tag `X.Y.Z` |
-| Archive | Zenodo record [10.5281/zenodo.22744317](https://doi.org/10.5281/zenodo.22744317) | new version with the source tarball and the `.sif` |
+| Archive (selected versions) | Zenodo record [10.5281/zenodo.22744317](https://doi.org/10.5281/zenodo.22744317) | new version with the source tarball and the `.sif` |
 
 ## Rules
 
@@ -102,8 +102,9 @@ docker push ghcr.io/famiuer/of2w:latest
 ### 6. Publish the release
 
 - [ ] Create the GitHub release from tag `v$V` with the changelog.
-- [ ] Upload to the Zenodo record as a new version: the source tarball
-      including submodules, and `of2w-$V.sif`.
+- [ ] For versions that get a Zenodo archive (not every patch release
+      does): upload the source tarball including submodules and
+      `of2w-$V.sif` as a new version of the record.
 - [ ] Update the DOI badge only if Zenodo issued a new concept DOI
       (normally it does not).
 

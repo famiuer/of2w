@@ -80,10 +80,9 @@ Either download and convert it from the registry:
 apptainer pull of2w.sif docker://ghcr.io/famiuer/of2w:0.1.2
 ```
 
-or download the ready-made `of2w-<version>.sif` attached to the
-[Zenodo record](https://doi.org/10.5281/zenodo.22744317) and copy it to
-the cluster with `scp`. The second way is useful when compute or login
-nodes have no internet access.
+or, when the cluster's nodes have no internet access, run that command
+on any Linux machine that has Apptainer and copy the resulting `.sif`
+to the cluster with `scp`. A `.sif` is a single ordinary file.
 
 > On a cluster, put the `.sif` on the scratch or project file system,
 > not in a small home quota. `apptainer pull` also needs a few GB of
