@@ -20,7 +20,7 @@ compiled under an explicit name** so morphing cases state their intent in
 
 ## Build
 
-Built automatically by the waves2Foam `Allwmake` (INSTALL.md §7 /
+Built automatically by the waves2Foam `Allwmake` (docs/manual_build.md §7 /
 `bootstrap.sh`) — the solver lives in the fork's `solvers2306_PLUS`
 tree. To rebuild just this solver:
 

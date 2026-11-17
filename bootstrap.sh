@@ -65,7 +65,7 @@ run_step() {  # $1 name, rest: command (run in a subshell, logged)
         tail -40 "$LOGS/$s.log" | sed 's/^/   | /'
         echo "   compile errors in the log, if any:"
         grep -nE 'error:|Error [0-9]|Stop\.' "$LOGS/$s.log" | tail -15 | sed 's/^/   | /'
-        echo "   Fix the cause (INSTALL.md troubleshooting), then re-run ./bootstrap.sh"
+        echo "   Fix the cause (docs/manual_build.md troubleshooting), then re-run ./bootstrap.sh"
         exit 1
     fi
 }

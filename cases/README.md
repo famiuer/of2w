@@ -1,6 +1,6 @@
 # OF2W test cases
 
-Six self-contained cases, each with a `run.sh`; cases 01-05 end with a
+Seven self-contained cases, each with a `run.sh`; cases 00-05 end with a
 `check.py` that prints PASS/FAIL (06 is a showcase — success is the run
 completing). Prerequisite: OpenFOAM v2306 env sourced + OF2W built.
 

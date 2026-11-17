@@ -32,7 +32,7 @@ Coupled OpenFAST decks therefore run `CompHydro=0`, `CompMooring=0`
   global-frame wrench at the platform reference point)
 - `openfast/`: OpenFAST adapter + the OF2 bridge client
 - `restraints/`: load providers and the OpenFOAM-facing restraints
-  (`restraints/openfoam/of2/` builds `libOF2.so`; see INSTALL.md §6)
+  (`restraints/openfoam/of2/` builds `libOF2.so`; see docs/manual_build.md §6)
 - `config/examples/`: example coupling dictionary snippets
 
 ## Build & test

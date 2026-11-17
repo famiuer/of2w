@@ -5,7 +5,7 @@
 #   source env.sh /path/to/openfoam-2306/etc/bashrc
 #
 # Idempotent: safe to source repeatedly, and inside slurm batch scripts
-# AFTER any `module load` lines (see INSTALL.md "HPC notes"). Ends with a
+# AFTER any `module load` lines (see docs/manual_build.md "HPC notes"). Ends with a
 # status summary; [WARN]/[FAIL] lines never abort your shell.
 #
 # Overridable before sourcing (defaults are the in-repo build layout):
@@ -36,7 +36,7 @@ fi
 if [ -n "${WM_PROJECT_DIR:-}" ] && command -v wmake >/dev/null 2>&1; then
     _of2w_ok "OpenFOAM ${WM_PROJECT_VERSION:-?} ($WM_PROJECT_DIR)"
 else
-    _of2w_fail "OpenFOAM env not loaded — source env.sh with the bashrc path (see INSTALL.md 'Locating OpenFOAM's bashrc')"
+    _of2w_fail "OpenFOAM env not loaded — source env.sh with the bashrc path (see docs/manual_build.md 'Locating OpenFOAM's bashrc')"
 fi
 
 # Inside the OF2W container image the stack lives in the system dirs.
@@ -78,7 +78,7 @@ if [ -f "$OF2W_ROOT/external/waves2Foam/bin/bashrc" ]; then
     . "$OF2W_ROOT/external/waves2Foam/bin/bashrc" quiet >/dev/null 2>&1
     _of2w_ok "waves2Foam env (WAVES_DIR=$WAVES_DIR)"
 else
-    _of2w_warn "waves2Foam not set up yet (external/waves2Foam/bin/bashrc missing — run ./bootstrap.sh or see INSTALL.md §7; only needed for the wave cases)"
+    _of2w_warn "waves2Foam not set up yet (external/waves2Foam/bin/bashrc missing — run ./bootstrap.sh or see docs/manual_build.md §7; only needed for the wave cases)"
 fi
 
 # ---- 4 · doctor: is everything actually built? ---------------------------
@@ -91,9 +91,9 @@ _of2w_lib() {  # $1 lib name, $2 severity(fail|warn), $3 hint
     else _of2w_warn "$1 missing — $3"; fi
 }
 if [ -n "${WM_PROJECT_DIR:-}" ]; then
-    _of2w_lib libOF2.so              warn "INSTALL.md §6 (needed by all coupled cases)"
-    _of2w_lib librigidBodyMooring.so warn "INSTALL.md §4 (needed by all coupled cases)"
-    _of2w_lib libstabRASModels.so    warn "INSTALL.md §4b (needed by turbulent cases)"
+    _of2w_lib libOF2.so              warn "docs/manual_build.md §6 (needed by all coupled cases)"
+    _of2w_lib librigidBodyMooring.so warn "docs/manual_build.md §4 (needed by all coupled cases)"
+    _of2w_lib libstabRASModels.so    warn "docs/manual_build.md §4b (needed by turbulent cases)"
     _of2lib=""
     [ -z "$_OF2W_CT" ] && [ -f "${FOAM_USER_LIBBIN:-/nonexistent}/libOF2.so" ] && _of2lib="$FOAM_USER_LIBBIN/libOF2.so"
     [ -z "$_of2lib" ] && [ -f "${FOAM_LIBBIN:-/nonexistent}/libOF2.so" ] && _of2lib="$FOAM_LIBBIN/libOF2.so"

@@ -6,8 +6,8 @@ authors:
   - family-names: Chen
     given-names: Geng
     affiliation: "Durham University"
-version: 0.1.0
-date-released: 2026-09-14
+version: 0.1.2
+date-released: 2026-11-17
 doi: 10.5281/zenodo.22744317
 identifiers:
   - type: doi
